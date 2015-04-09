@@ -1,2 +1,2 @@
 # Solitaire
-HTML5 Solitaire engine for data-driven rule sets
+HTML5 Solitaire engine with data-driven rule sets
