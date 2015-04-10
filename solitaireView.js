@@ -1,5 +1,5 @@
 //SolitaireView.js
-// James Lundgren-test2
+// James Lundgren-testing again making another change
 
 (function(window) {
 
