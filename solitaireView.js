@@ -1,5 +1,6 @@
 //SolitaireView.js
 // James Lundgren-testing again making another change
+// Victor Marrufo
 
 (function(window) {
 
