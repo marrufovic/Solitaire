@@ -1,5 +1,5 @@
 //SolitaireView.js
-// James Lundgren-test
+// James Lundgren-test2
 
 (function(window) {
 
