@@ -1,0 +1,63 @@
+{
+	"name" : "Klondike Draw 3",
+	"layout" : {
+		"cards" : ["standard-deck 1"],
+		"piles" : [
+			{ "id" : "pile1", "pileType" : "playPile", "count" : 1 },
+			{ "id" : "pile2", "pileType" : "playPile", "count" : 2 },
+			{ "id" : "pile3", "pileType" : "playPile", "count" : 3 },
+			{ "id" : "pile4", "pileType" : "playPile", "count" : 4 },
+			{ "id" : "pile5", "pileType" : "playPile", "count" : 5 },
+			{ "id" : "pile6", "pileType" : "playPile", "count" : 6 },
+			{ "id" : "pile7", "pileType" : "playPile", "count" : 7 },
+			{ "id" : "stock1", "pileType" : "stockPile", "count" : 24 },
+			{ "id" : "stockPlay", "pileType" : "stockPlayPile" },
+			{ "id" : "win1", "pileType" : "winPile" },
+			{ "id" : "win2", "pileType" : "winPile" },
+			{ "id" : "win3", "pileType" : "winPile" },
+			{ "id" : "win4", "pileType" : "winPile" }
+			
+		]
+	},
+
+	"rules" : {
+
+		"pileTypes" : {
+			"playPile" : {
+				"setup" : ["random down"],
+				"grab" : {
+					"rule" : { "AND" : ["target facing=up", "target#pos+1 suit=alt target"] },
+					"trigger-drop" : { "rule" : "pile#top facing=down" , "action" : "face pile#top up"}
+				},
+				"drop" : {
+					"rule" : { "OR" : [{ "AND" : ["pile count=0", "held rank=12"]}, 
+									   { "AND" : ["held color=alt pile#top", "held rank=-1 pile#top"]}] }
+				}
+			},
+			"stockPile" : {
+				"setup" : ["random down"],
+				"stackSize" : 1,
+				"action" : [ 
+					{ "rule" : "empty", "action" : ["move stockPlay all to this down"]},
+					{					   "action" : ["move pile 3 to stockPlay up"]}
+				]
+			},
+			"stockPlayPile": {
+				"stackSize" : 3,
+				"grab" : {
+					"rule" : "target position=top"
+				}
+			},
+			"winPile" : {
+				"grab" : {
+					"rule" : "target position=top"
+					},
+				"drop" : {
+					"rule" : { "OR" : [ {"AND" : ["pile count=0", "held rank=0"] },
+										{"AND" : ["held suit=same pile#top", "held rank=+1 pile#top"]}] },
+					"trigger" : { "rule" : "pileType:winPile count=13", "action" : "win" }
+				}
+			}
+		}
+	}
+}
