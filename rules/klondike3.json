@@ -1,7 +1,7 @@
 {
 	"name" : "Klondike Draw 3",
 	"layout" : {
-		"cards" : ["standard-deck 1"],
+		"cards" : { "cardType" : "standard-deck", "count" : 1},
 		"piles" : [
 			{ "id" : "pile1", "pileType" : "playPile", "count" : 1 },
 			{ "id" : "pile2", "pileType" : "playPile", "count" : 2 },
@@ -24,38 +24,47 @@
 
 		"pileTypes" : {
 			"playPile" : {
-				"setup" : ["random down"],
-				"grab" : {
-					"rule" : { "AND" : ["target facing=up", "target#pos+1 suit=alt target"] },
-					"trigger-drop" : { "rule" : "pile#top facing=down" , "action" : "face pile#top up"}
+				"setup" : "random down",
+				"grab" :  { "AND" : [{ "target" : "grabTarget", "condition" : { "attribute" : "facing", "relation" : "=", "value" : "up" }},
+										{ "target" : { "id" : "grabTarget", "selector" : "pos-1"}, "condition" : { "attribute" : "suit", "relation" : "=", "value" : "alt", "target" : "dropTarget"}} ] 
 				},
-				"drop" : {
-					"rule" : { "OR" : [{ "AND" : ["pile count=0", "held rank=12"]}, 
-									   { "AND" : ["held color=alt pile#top", "held rank=-1 pile#top"]}] }
-				}
+				"drop" : { "OR" : [{ "AND" : [{ "target" : "pile", "condition" : {"attribute" : "count", "relation" : "=", "value" : "0"}},
+												  { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "12"}} ]}, 
+									   { "AND" : [{ "target" : "held", "condition" : {"attribute" : "color", "relation" : "=", "value" : "alt", "target" : {"id" : "pile", "selector" : "top"}}},
+									   			   { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "-1", "target" : {"id" : "pile", "selector" : "top"}}} ]}
+									  ]
+				},
+				"triggers" : {"onDropFrom" : { "rule" : { "target" : { "id" : "pile", "selector" :"top" }, "condition" : { "attribute" : "facing", "relation" : "=", "value" : "down"}},
+									   "action" : { "command" : "face", "target" : { "id" : "pile", "selector" : "top"}, "arguments" : "up"}}
+							}
 			},
 			"stockPile" : {
-				"setup" : ["random down"],
+				"setup" : "random down",
 				"stackSize" : 1,
-				"action" : [ 
-					{ "rule" : "empty", "action" : ["move stockPlay all to this down"]},
-					{					   "action" : ["move pile 3 to stockPlay up"]}
+				"activate" : [{ "rule" : { "target" : "pile", "condition" : {"attribute" : "count", "relation" : "=", "value" : "0"}}, 
+								"action" : {"command" : "move", "target" : {"id" : "stockPlay", "selector" : "all"}, "arguments" : ["pile", "down"]}},
+							  { "rule" : { "target" : "pile", "condition" : {"attribute" : "count", "relation" : ">", "value" : "0"}},
+							  		"action" : { "command" : "move", "target" : {"id" : "pile", "selector" : { "id" : "top", "count" : 3}}, "arguments" : ["stockPlay", "up"]}}
 				]
 			},
 			"stockPlayPile": {
 				"stackSize" : 3,
 				"grab" : {
-					"rule" : "target position=top"
+					"rule" : { "target" : "grabTarget", "condition" : {"attribute" : "position", "relation" : "=", "value" : "top"}}
 				}
 			},
 			"winPile" : {
 				"grab" : {
-					"rule" : "target position=top"
+					"rule" : { "target" : "grabTarget", "condition" : {"attribute" : "position", "relation" : "=", "value" : "top"}
 					},
 				"drop" : {
-					"rule" : { "OR" : [ {"AND" : ["pile count=0", "held rank=0"] },
-										{"AND" : ["held suit=same pile#top", "held rank=+1 pile#top"]}] },
-					"trigger" : { "rule" : "pileType:winPile count=13", "action" : "win" }
+					"rule" : { "OR" : [ {"AND" : [{ "target" : "pile", "condition" : {"attribute" : "count", "relation" : "=", "value" : "0"}},
+												 { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "0" }} ]},
+										{"AND" : [{ "target" : "held", "condition" : {"attribute" : "suit", "relation" : "=", "value" : "same", "target2" : {"id" : "pile", "selector" : "top"}}},
+												  { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "+1", "target2" : {"id" : "pile", "selector" : "top"}}} ]} ]}
+				},
+				"triggers" : {"onDropOnto" : { "rule" : { "target" : {"idType" : "pileType", "id" : "winPile"}, "condition" : {"attribute" : "count", "relation" : "=", "value" : "13"}},
+								  "action" : { "command" : "win" }}}
 				}
 			}
 		}

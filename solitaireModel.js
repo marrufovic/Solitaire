@@ -43,12 +43,15 @@
 		//setup layout
 		//get cards that the game will use
 		var deck = [];
-		for(var i = 0; i < this.game.layout.cards.length; i++)
-		{
 
-			var deckStr = this.game.layout.cards[i].split(" ");
-			var singleDeck = this._makeDeck(deckStr[0]);
-			for(var j = 0; j < deckStr[1].length; j++)
+		var cards =  this.game.layout.cards;
+		if(!Array.isArray(cards))
+			cards = [cards];
+		for(var i = 0; i < cards.length; i++)
+		{
+			var deckObj = cards[i];
+			var singleDeck = this._makeDeck(deckObj.cardType);
+			for(var j = 0; j < deckObj.count; j++)
 			{
 				deck = deck.concat(singleDeck);
 			}
@@ -111,8 +114,8 @@
 
 	SolitaireModel.prototype.canGrabCard = function(card)
 	{
-		var grabRules = this.game.rules.pileTypes[card.pile].grab.rule;
-		return this._evaluateRule(grabRules, { target : card });
+		var grabRules = this.game.rules.pileTypes[card.pile.pileType].grab;
+		return this._evaluateRule(grabRules, { grabTarget : card });
 	};
 
 	//recursively evaluate a "rule" entry
@@ -121,35 +124,34 @@
 	//returns true/false
 	SolitaireModel.prototype._evaluateRule = function(rule, context)
 	{
-		//base case: a string, evaluate
-		if(typeof rule === 'string')
+		//check if it is a boolean expression. if it is, recursively evaluate rules in the expression
+		if(rule.hasOwnProperty('AND'))
 		{
-			//target condition [arg1 arg2... argn]
-			var ruleParts = rule.split(" ");
-			var target = ruleParts[0];
-			var condition = ruleParts[1];
-			var arguments = [];
-			if(ruleParts.length > 2)
-				arguments.concat(ruleParts.slice(2));
-
-			var targetObj = this._findTarget(target, context);
-			//TODO: parse condition and arguments
+			for(var i = 0; i < rule.AND.length; i++)
+			{
+				//evaluate, short circuit
+				if(this._evaluateRule(rule.AND[i], context) === false)
+					return false;
+			}
+			return true;
 		}
 
-		//TODO: handle arrays and AND/OR objects
-
-		//wrap single object in array
-		// if(!Array.isArray(rule))
-		// {
-		// 	var arr = [];
-		// 	arr.push(rule);
-		// 	rule = arr;
-		// }
-
-		// for(var i = 0; i < rule.length; i++)
-		// {
-		// 	var 
-		// }
+		else if(rule.hasOwnProperty('OR'))
+		{
+			for(var i = 0; i < rule.OR.length; i++)
+			{
+				//evaluate, short circuit
+				if(this._evaluateRule(rule.OR[i], context) === true)
+					return true;
+			}
+			return false;
+		}
+		else
+		{
+			//base case, assume this is a rule
+			var targetObj = this._findTarget(rule.target, context);
+			return true;
+		}
 	}
 
 
@@ -158,35 +160,38 @@
 	//throws on errors
 	SolitaireModel.prototype._findTarget = function(target, context)
 	{
-		var targetParts = target.split(":");
+
 		var targetId = null;
-		var targetIdType = null;
+		var targetIdType = 'id';
+		var targetSelector = { id: 'this', count: 1};
+		if(typeof target === 'string')
+		{
+			targetId = target;
+		}
+		else
+		{
+			if(target.hasOwnProperty('id'))
+			{
+				targetId = target.id;
+			}
+			else
+			{
+				throw new Error("RuleDefinition: target id required on target " + target);
+			}
+			if(target.hasOwnProperty('idType'))
+			{
+				targetIdType = target.idType;
+			}
+			if(target.hasOwnProperty('selector'))
+			{
+				targetSelector = target.selector;
+				if(typeof targetSelector === 'string')
+				{
+					targetSelector = { id: targetSelector, count: 1};
+				}
+			}
+		}
 		
-		if(targetParts.length === 1)
-		{
-			targetId = targetParts[0];
-			targetIdType = 'id';
-		}
-		else
-		{
-			//identifier type
-			targetIdType = targetParts[0];
-			targetId = targetParts[1];
-		}
-
-		//check for a selector (all,top,bottom,above,below)
-		var targetSelectorParts = targetId.split('#');
-		var targetSelector = null;
-		if(targetSelectorParts.length === 1)
-		{
-			targetSelector = 'this';
-		}
-		else
-		{
-			targetId = targetSelectorParts[0];
-			targetSelector = targetSelectorParts[1];
-		}
-
 		var targetObj = null;
 		if(targetIdType === 'pileType')
 		{
@@ -196,67 +201,92 @@
 		}
 		else if(targetIdType === 'id')
 		{
-			//keywords are 'special' ids
-			if(targetId === 'pile')
+			//first check the context for any keyword ids
+			if(context.hasOwnProperty(targetId))
 			{
-				targetObj = context.pile;
+				targetObj = context[targetId];
 			}
-			else if(targetId === 'target')
+			//not found in context, try finding a pile with the id
+			else if(this.piles.hasOwnProperty(targetId))
 			{
-				targetObj = context.target;
-			}
-			else if(targetId === 'held')
-			{
-				targetObj = context.held;
+				targetObj = this.piles[targetId];
 			}
 			else
 			{
-				//target is a pile identified by id
-				targetObj = this.piles[targetId];
+				//invalid id
+				throw new Error("RuleDefinition: target id " + targetId + " not found on target " + targetId);
 			}
 		}
 		else
 		{
+			//invalid idType
 			throw new Error("RuleDefinition: unknown target idType " + targetIdType + " on target " + targetId);
 		}
 
-		if(typeof targetObj === 'undefined')
-		{
-			throw new Error("RuleDefinition: target id " + targetId + " not found on target " + targetId);
-		}
-
 		//use selector to refine selection
-		if(targetSelector === 'top' || targetSelector === 'bot')
+		if(targetSelector.id.slice(0,3) === 'top' || targetSelector.id.slice(0,3) === 'bot')
 		{
-			if(typeof targetObj !== 'SolitairePile')
-				throw new Error("RuleDefinition: selector " + targetSelector + "not allowed on target " + targetId +
-									" of type " + typeof targetObj);
-			targetObj = targetObj.peekCard(targetSelector)
-		}
-		else if(targetSelector.slice(0,3) === 'pos')
-		{
-			if(typeof targetObj !== 'SolitaireCard')
+			if(!(targetObj instanceof SolitairePile))
 				throw new Error("RuleDefinition: selector " + targetSelector + "not allowed on target " + targetId +
 									" of type " + typeof targetObj);
 			
-			var targetRelativeIndex = parseInt(targetSelector.slice(3));
-			var targetPosition = targetObj.pile.getCardPosition(targetObj) + targetRelativeIndex;
-			if(targetPosition > 0 && targetPosition < targetObj.pile.getCount())
+			var startIndex = 0;
+			if(targetSelector.id.length > 3)
+				startIndex = parseInt(pos.slice(3));
+			var selection = [];
+			for(var i  = 0; i < targetSelector.count; i++)
 			{
-				targetObj = targetObj.pile.peekCard(targetPosition);
+				selection.push(targetObj.peekCard(targetSelector.id + (startIndex + i)));
+			}
+
+			if(selection.length === 1)
+				targetObj = selection[0];
+			else
+				targetObj = selection;
+			
+		}
+		else if(targetSelector.id.slice(0,3) === 'pos')
+		{
+			if(!(targetObj instanceof SolitaireCard))
+				throw new Error("RuleDefinition: selector " + targetSelector.id + " not allowed on target " + targetId +
+									" of type " + targetObj.contructor);
+			
+			var sign = targetSelector.id.slice(3,4);
+			var targetPosition = 0;
+			if(sign === '+' || sign === '-')
+			{
+				//relative
+				var relativeIndex = parseInt(targetSelector.id.slice(3));
+				targetPosition = targetObj.pile.getCardPosition(targetObj) + relativeIndex;
 			}
 			else
 			{
-				targetObj = null;
+				//absolute
+				targetPosition = parseInt(targetSelector.slice(3));
 			}
+
+			var selection = [];
+			for(var i = 0; i < targetSelector.count; i++)
+			{
+				var currentPosition = targetPosition + i;
+				if(currentPosition >= 0 && currentPosition < targetObj.pile.getCount())
+				{
+					selection.push(targetObj.pile.peekCard(currentPosition));
+				}
+			}
+
+			if(selection.length === 1)
+				targetObj = selection[0];
+			else
+				targetObj = selection;
 		}
-		else if(targetSelector === 'this')
+		else if(targetSelector.id === 'this')
 		{
 			//do nothing (targetObj = targetObj)
 		}
 		else
 		{
-			throw new Error("RuleDefiniton: unknown selector " + targetSelector + " on target " + targetId);
+			throw new Error("RuleDefiniton: unknown selector " + targetSelector.id + " on target " + targetId);
 		}
 
 		return targetObj;
@@ -309,14 +339,24 @@
 	SolitairePile.prototype._indexFromPosition = function(pos) {
 		if(typeof pos === 'undefined')
 		{
-			return this.pile.length;
+			return this.pile.length - 1;
 		}
 		else if(typeof pos === 'string')
 		{
-			if(pos === 'top')
-				return this.pile.length;
-			else if(pos === 'bot')
-				return 0;
+			if(pos.slice(0,3) === 'top')
+			{
+				var position = this.pile.length - 1;
+				if(pos.length > 3)
+					position -= parseInt(pos.slice(3));
+				return position;
+			}
+			else if(pos.slice(0,3) === 'bot')
+			{
+				var position = 0;
+				if(pos.length > 3)
+					position += parseInt(pos.slice(3));
+				return position;
+			}
 		}
 		else
 			return pos;
