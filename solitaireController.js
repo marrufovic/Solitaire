@@ -1,5 +1,8 @@
 //SolitaireController.js
 
+// Elliot, I am still going over what you have done and trying to learn the game rules. I haven't been able to focus
+// on it a lot because I have been sick for last few days. I will keep working on it over next few days. -Dharani
+
 (function(window) {
 
 	//classes
