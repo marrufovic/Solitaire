@@ -1,0 +1,145 @@
+div#solitaireBoard{
+    background-color:#00CC33;
+    border:#999 1px solid;
+    width:840px;
+    height:540px;
+    padding:24px;
+    margin:0px auto;
+}
+
+div#solitaireBoard > #deck{
+    position:absolute;
+    left:19%;
+    top:10%;
+    border:#999999 2px solid;
+    width:70px;
+    height:90px;
+    float:left;
+    margin:10px;
+    padding:20px;
+    cursor:pointer;
+    text-align:center;
+}
+
+div#solitaireBoard > #waste{
+    position:absolute;
+    left:29%;
+    top:10%;
+    border:#999999 2px solid;
+    width:70px;
+    height:90px;
+    float:left;
+    margin:10px;
+    padding:20px;
+    cursor:pointer;
+    text-align:center;
+}
+
+div#solitaireBoard > #dest1{
+    position:absolute;
+    left:44%;
+    top:10%;
+    border:#999999 2px solid;
+    width:70px;
+    height:90px;
+    float:left;
+    margin:10px;
+    padding:20px;
+    cursor:pointer;
+    text-align:center;
+}
+
+div#solitaireBoard > #dest2{
+    position:absolute;
+    left:53%;
+    top:10%;
+    border:#999999 2px solid;
+    width:70px;
+    height:90px;
+    float:left;
+    margin:10px;
+    padding:20px;
+    cursor:pointer;
+    text-align:center;
+}
+
+div#solitaireBoard > #dest3{
+    position:absolute;
+    left:62%;
+    top:10%;
+    border:#999999 2px solid;
+    width:70px;
+    height:90px;
+    float:left;
+    margin:10px;
+    padding:20px;
+    cursor:pointer;
+    text-align:center;
+}
+
+div#solitaireBoard > #dest4{
+    position:absolute;
+    left:71%;
+    top:10%;
+    border:#999999 2px solid;
+    width:70px;
+    height:90px;
+    float:left;
+    margin:10px;
+    padding:20px;
+    cursor:pointer;
+    text-align:center;
+}
+
+div#solitaireBoard > #piles > div{
+    border:#999999 2px solid;
+    width:70px;
+    height:90px;
+    float:left;
+    margin:10px;
+    padding:20px;
+    cursor:pointer;
+    text-align:center;
+}
+
+div#solitaireBoard > #piles > #pile1{
+    position:absolute;
+    left:18%;
+    top:40%;
+}
+
+div#solitaireBoard > #piles > #pile2{
+    position:absolute;
+    left:27%;
+    top:40%;
+}
+
+div#solitaireBoard > #piles > #pile3{
+    position:absolute;
+    left:36%;
+    top:40%;
+}
+
+div#solitaireBoard > #piles > #pile4{
+    position:absolute;
+    left:45%;
+    top:40%;
+}
+
+div#solitaireBoard > #piles > #pile5{
+    position:absolute;
+    left:54%;
+    top:40%;
+}
+
+div#solitaireBoard > #piles > #pile6{
+    position:absolute;
+    left:63%;
+    top:40%;
+}
+
+div#solitaireBoard > #piles > #pile7{
+    position:absolute;
+    left:72%;
+    top:40%;
+}
