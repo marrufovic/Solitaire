@@ -7,15 +7,26 @@
   <title>Solitaire</title>
   <meta name="description" content="HTML5 Solitaire">
   <meta name="author" content="TeamRAT-UofU">
-
+  <link rel="stylesheet" type="text/css" href="style.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
   <script src="solitaireGameRules.js"></script>
   <script src="solitaireModel.js"></script>
   <script src="solitaireView.js"></script>
   <script src="solitaireController.js"></script>
   <script src="solitaireGame.js"></script>
+  <script>
+
+
+
+window.onload = function () {
+  
+ buildBoard();
+}
+</script>
 </head>
 
 <body>
+<div id="solitaireBoard">
+</div>
 </body>
 </html>
