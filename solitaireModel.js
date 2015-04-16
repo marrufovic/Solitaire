@@ -33,7 +33,7 @@
 	//classes
 	var SolitaireModel = function()
 	{
-	}
+	};
 
 	SolitaireModel.prototype.newGame = function(gameRules)
 	{
@@ -77,7 +77,7 @@
 		{
 			console.log("RuleDef warning: some cards undealt.");
 		}
-	}
+	};
 
 	SolitaireModel.prototype._makeDeck = function(deckType)
 	{
@@ -118,6 +118,13 @@
 		return this._evaluateRule(grabRules, { grabTarget : card });
 	};
 
+	SolitaireModel.prototype.canDropCard = function(card, pile, pos)
+	{
+		var dropRules = this.game.rules.pileTypes[card.pile.pileType].drop;
+		var dropTarget = pile.peekCard(pos);
+		return this._evaluateRule(dropRules, { held : card, pile : pile, dropTarget : dropTarget });
+	};
+
 	//recursively evaluate a "rule" entry
 	//context: object that stores reference to model objects that will be needed in the rule parsing
 	//		e.g. - a "grab" rule must provide a 'target', "drop" must provide 'held', 'target', and 'pile'
@@ -150,9 +157,102 @@
 		{
 			//base case, assume this is a rule
 			var targetObj = this._findTarget(rule.target, context);
-			return true;
+			var targetObj2 = null;
+			if(rule.condition.hasOwnProperty('target'))
+				targetObj2 = this._findTarget(rule.condition.target, context);
+
+			return this._evaluateCondition(rule.condition, targetObj, targetObj2);
 		}
-	}
+	};
+
+	SolitaireModel.prototype._evaluateCondition = function(condition, target, target2)
+	{
+		var lhs = this._getAttributeValue(condition.attribute, target);
+		var rhs = null;
+		if(target2 === null)
+			rhs = condition.value;
+		else
+			this._getAttributeValue(condition.attribute, target2);
+
+		var objectComparison = false;
+		//transform the value of rhs based on parameters
+		if(condition.value === 'alt')
+		{
+			objectComparison = true;
+			if(target2 === null && typeof condition.target === 'undefined')
+				return true;
+			if(condition.attribute !== 'color')
+				throw new Error("RuleDefinition: condition value " + condition.value + 
+					" not allowed on attribute  " + condition.attribute);
+
+			if(rhs === 'red')
+				rhs = 'black';
+			else if(rhs === 'black')
+				rhs = 'red';
+		}
+		else if(condition.value === 'same')
+		{
+			objectComparison = true;
+		}
+		else if(condition.value.slice(0,1) === '+' || condition.value.slice(0,1) === '-')
+		{
+			objectComparison = true;
+			var relativeValue = parseInt(condition.value);
+			rhs += relativeValue;
+		}
+
+		//automatically succeed on object comparisons if either target is null
+		if(objectComparison && (lhs === null || rhs === null))
+			return true;
+
+		if(condition.relation === '=')
+		{
+			return rhs === lhs;
+		}
+		else if(condition.relation === '!=')
+		{
+			return rhs !== lhs;
+		}
+		else if(condition.relation === '<')
+		{
+			return rhs < lhs;
+		}
+		else if(condition.relation === '>')
+		{
+			return rhs > lhs;
+		}
+		else
+		{
+			throw new Error("RuleDefinition: unknown relation " + condition.relation);
+		}
+	};
+
+	SolitaireModel.prototype._getAttributeValue = function(attribute, target)
+	{
+		switch(attribute)
+		{
+			//pile attributes
+			case 'count':
+				return target.getCount();
+			//card attributes
+			case 'suit':
+				return target.suit;
+			case 'color':
+				return SUIT_COLOR[target.suit];
+			case 'rank':
+				return target.rank;
+			case 'facing':
+				if(target.facingUp)
+					return 'up';
+				else
+					return 'down';
+			case 'position':
+				return target.pile.getCardPosition(target);
+			default:
+				throw new Error("RuleDefinition: unknown attribute " + attribute);
+				break;
+		}
+	};
 
 
 	//returns the Model object referred to by the target string in the given context
@@ -238,11 +338,7 @@
 			{
 				selection.push(targetObj.peekCard(targetSelector.id + (startIndex + i)));
 			}
-
-			if(selection.length === 1)
-				targetObj = selection[0];
-			else
-				targetObj = selection;
+			targetObj = selection;
 			
 		}
 		else if(targetSelector.id.slice(0,3) === 'pos')
@@ -266,6 +362,7 @@
 			}
 
 			var selection = [];
+
 			for(var i = 0; i < targetSelector.count; i++)
 			{
 				var currentPosition = targetPosition + i;
@@ -274,11 +371,7 @@
 					selection.push(targetObj.pile.peekCard(currentPosition));
 				}
 			}
-
-			if(selection.length === 1)
-				targetObj = selection[0];
-			else
-				targetObj = selection;
+			targetObj = selection;
 		}
 		else if(targetSelector.id === 'this')
 		{
@@ -289,8 +382,13 @@
 			throw new Error("RuleDefiniton: unknown selector " + targetSelector.id + " on target " + targetId);
 		}
 
+		if(targetObj.length === 0)
+			targetObj = null;
+		else if(targetObj.length === 1)
+			targetObj = targetObj[0];
+
 		return targetObj;
-	}
+	};
 
 	SolitaireModel.prototype.moveCard = function(card, pile, pos)
 	{
@@ -334,7 +432,7 @@
 
 	SolitairePile.prototype.getCardPosition = function(card) {
 		return this.pile.indexOf(card);
-	}
+	};
 
 	SolitairePile.prototype._indexFromPosition = function(pos) {
 		if(typeof pos === 'undefined')

@@ -11,6 +11,10 @@ gameRules.loadGame("rules/klondike3.json",
 
 	//pretend view received a drag & drop
 	//view.onCardDropped("a", "b");
-	console.log(model.piles['pile2'].peekCard());
-	console.log(model.canGrabCard(model.piles['pile2'].peekCard()));
+	var card = model.piles['pile2'].peekCard();
+	var pile = model.piles['pile3'];
+	console.log(card);
+	console.log(pile);
+	console.log(model.canGrabCard(card));
+	console.log(model.canDropCard(card, pile, 'top'));
 });
