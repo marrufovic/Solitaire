@@ -30,7 +30,7 @@
 										{ "target" : { "id" : "grabTarget", "selector" : "pos-1"}, "condition" : { "attribute" : "color", "relation" : "=", "value" : "alt", "target" : "grabTarget"}} ] 
 				},
 				"drop" : { "OR" : [{ "AND" : [{ "target" : "pile", "condition" : {"attribute" : "count", "relation" : "=", "value" : "0"}},
-												  { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "12"}} ]}, 
+												  { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "13"}} ]}, 
 									   { "AND" : [{ "target" : "held", "condition" : {"attribute" : "color", "relation" : "=", "value" : "alt", "target" : {"id" : "pile", "selector" : "top"}}},
 									   			   { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "-1", "target" : {"id" : "pile", "selector" : "top"}}} ]}
 									  ]
@@ -45,7 +45,7 @@
 				"activate" : [{ "rule" : { "target" : "pile", "condition" : {"attribute" : "count", "relation" : "=", "value" : "0"}}, 
 								"action" : {"command" : "move", "target" : {"id" : "stockPlay", "selector" : "all"}, "arguments" : ["pile", "down"]}},
 							  { "rule" : { "target" : "pile", "condition" : {"attribute" : "count", "relation" : ">", "value" : "0"}},
-							  		"action" : { "command" : "move", "target" : {"id" : "pile", "selector" : { "id" : "top", "count" : 3}}, "arguments" : ["stockPlay", "up"]}}
+							  		"action" : { "command" : "move", "target" : {"id" : "pile", "selector" : { "id" : "top", "count" : "3"}}, "arguments" : ["stockPlay", "up"]}}
 				]
 			},
 			"stockPlayPile": {
@@ -60,7 +60,7 @@
 					},
 				"drop" : {
 					"rule" : { "OR" : [ {"AND" : [{ "target" : "pile", "condition" : {"attribute" : "count", "relation" : "=", "value" : "0"}},
-												 { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "0" }} ]},
+												 { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "1" }} ]},
 										{"AND" : [{ "target" : "held", "condition" : {"attribute" : "suit", "relation" : "=", "value" : "same", "target2" : {"id" : "pile", "selector" : "top"}}},
 												  { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "+1", "target2" : {"id" : "pile", "selector" : "top"}}} ]} ]}
 				},

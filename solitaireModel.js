@@ -2,14 +2,6 @@
 
 (function(window) {
 
-	var SUITS = ["hearts", "diamonds", "clubs", "spades"];
-	//enums
-	var SUIT_COLOR = { hearts : { color : "red" },
-				  diamonds : { color : "red"},
-				  clubs : { color : "black" },
-				  spades : { color : "black" }
-	};
-
 	//fisher-yates shuffle, implementation from http://stackoverflow.com/a/2450976
 	var shuffle = function(array) {
 		var currentIndex = array.length, temporaryValue, randomIndex ;
@@ -37,6 +29,14 @@
 		this.onCardMoved = null;
 		this.onCardUpdated = null;
 		this.onGameWon = null;
+	};
+
+	//enums
+	SolitaireModel.prototype.SUITS = ["hearts", "diamonds", "clubs", "spades"];
+	SolitaireModel.prototype.SUIT_COLOR = { hearts : "red",
+				  diamonds : "red",
+				  clubs : "black",
+				  spades : "black"
 	};
 
 	SolitaireModel.prototype.newGame = function(gameRules)
@@ -91,12 +91,12 @@
 		var deck = [];
 		if(deckType === "standard-deck")
 		{
-			for(var suitIndex = 0; suitIndex < SUITS.length; suitIndex++)
+			for(var suitIndex = 0; suitIndex < this.SUITS.length; suitIndex++)
 			{
-				var suit = SUITS[suitIndex];
-				for(var rank = 0; rank < 13; rank++)
+				var suit = this.SUITS[suitIndex];
+				for(var rank = 1; rank <= 13; rank++)
 				{
-					deck.push(new SolitaireCard(suit, rank, true));
+					deck.push(new SolitaireCard(suit, rank, false));
 				}
 			}
 		}
@@ -131,6 +131,64 @@
 		var dropTarget = pile.peekCard(pos);
 		return this._evaluateRule(dropRules, { held : card, pile : pile, dropTarget : dropTarget });
 	};
+
+	SolitaireModel.prototype._evaluateRuleActionPairs = function(ruleActionPairs, context)
+	{
+		if(typeof ruleActionPairs === 'undefined')
+			return;
+
+		if(typeof ruleActionPairs === 'string')
+			ruleActionPairs = [ruleActionPairs];
+		for(var i = 0; i < ruleActionPairs.length; i++)
+		{
+			var rule = ruleActionPairs[i].rule;
+			var action = ruleActionPairs[i].action;
+			if(typeof rule === 'undefined' || this._evaluateRule(rule, context))
+			{
+				this._evaluateAction(action, context);
+			}
+		}
+	}
+
+	SolitaireModel.prototype._evaluateAction = function(action, context)
+	{
+		var target = this._findTarget(action.target, context);
+		var args = action.arguments;
+		if(typeof args === 'string')
+			args = [args];
+		if(action.command === 'face')
+		{
+			if(args[0] === 'up')
+				target.facingUp = true;
+			else if(args[0] === 'down')
+				target.facingUp = false;
+			else
+				throw new Error("RuleDefinition: invalid argument " + args[0] + " on command " + action.command);
+
+			this.onCardUpdated(target);
+		}
+		else if(action.command === 'move')
+		{
+			var target2 = this._findTarget(args[0], context);
+			this.moveCard(target, target2);
+			if(args[1] === 'up')
+				target.facingUp = true;
+			else if(args[1] === 'down')
+				target.facingUp = false;
+			else
+				throw new Error("RuleDefinition: invalid argument " + args[1] + " on command " + action.command);
+
+			this.onCardUpdated(target);
+		}
+		else if(action.command === 'win')
+		{
+			this.onGameWon();
+		}
+		else
+		{
+			throw new Error("RuleDefinition: unknown command " + action.command);
+		}
+	}
 
 	//recursively evaluate a "rule" entry
 	//context: object that stores reference to model objects that will be needed in the rule parsing
@@ -179,7 +237,7 @@
 		if(target2 === null)
 			rhs = condition.value;
 		else
-			this._getAttributeValue(condition.attribute, target2);
+			rhs = this._getAttributeValue(condition.attribute, target2);
 
 		var objectComparison = false;
 		//transform the value of rhs based on parameters
@@ -211,6 +269,10 @@
 		//automatically succeed on object comparisons if either target is null
 		if(objectComparison && (lhs === null || rhs === null))
 			return true;
+
+		//if lhs is number and rhs is not a number, parse rhs as an integer
+		if(typeof lhs === 'number' && typeof rhs !== 'number')
+			rhs = parseInt(rhs);
 
 		if(condition.relation === '=')
 		{
@@ -245,7 +307,7 @@
 			case 'suit':
 				return target.suit;
 			case 'color':
-				return SUIT_COLOR[target.suit];
+				return this.SUIT_COLOR[target.suit];
 			case 'rank':
 				return target.rank;
 			case 'facing':
@@ -399,19 +461,31 @@
 
 	SolitaireModel.prototype.moveCard = function(card, pile, pos)
 	{
+		var triggers = this.game.rules.pileTypes[card.pile.pileType].triggers;
+
 		card.pile.removeCard(card);
-		//run grab triggers
+		if(typeof triggers !== 'undefined')
+		{
+			//run grab triggers
+			this._evaluateRuleActionPairs(triggers.onGrab, context);
+		}
 
 		pile.putCard(card, pos);
-		//run drop from triggers
-		//run drop to triggers		
+		if(typeof triggers !== 'undefined')
+		{
+			//run drop from triggers
+			this._evaluateRuleActionPairs(triggers.onDropFrom, context);
+			//run drop to triggers		
+			this._evaluateRuleActionPairs(triggers.onDropOnto, context);
+		}
 
 		this.onCardMoved(card);
 	};
 
 	SolitaireModel.prototype.activateCard = function(card)
 	{
-		
+		var activateRule = this.game.rules.pileTypes[card.pile.pileType].activate;
+		this._evaluateRuleActionPairs(activateRule);
 	};
 
 	window.SolitaireModel = SolitaireModel;
@@ -426,18 +500,18 @@
 	};
 
 	SolitairePile.prototype.putCard = function(card, pos) {	
-		this.pile.splice(this._indexFromPosition(pos), 0, card);
+		this.pile.splice(this._indexFromPosition(pos, true), 0, card);
 
 		card.pile = this;
 	};
 
 	SolitairePile.prototype.peekCard = function(pos) {
 		
-		return this.pile[this._indexFromPosition(pos)];
+		return this.pile[this._indexFromPosition(pos, false)];
 	};
 
 	SolitairePile.prototype.removeCard = function(pos) {
-		var card = this.pile.splice(this._indexFromPosition(pos), 1)[0];
+		var card = this.pile.splice(this._indexFromPosition(pos, false), 1)[0];
 		card.pile = null;
 		return card;
 	};
@@ -450,10 +524,13 @@
 		return this.pile.indexOf(card);
 	};
 
-	SolitairePile.prototype._indexFromPosition = function(pos) {
+	SolitairePile.prototype._indexFromPosition = function(pos, insert) {
 		if(typeof pos === 'undefined')
 		{
-			return this.pile.length - 1;
+			if(insert)
+				return this.pile.length;
+			else
+				return this.pile.length - 1;
 		}
 		else if(typeof pos === 'string')
 		{
@@ -462,6 +539,9 @@
 				var position = this.pile.length - 1;
 				if(pos.length > 3)
 					position -= parseInt(pos.slice(3));
+
+				if(insert)
+					position += 1;
 				return position;
 			}
 			else if(pos.slice(0,3) === 'bot')
