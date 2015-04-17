@@ -32,8 +32,8 @@
 	};
 
 	//enums
-	SoltaireModel.prototype.SUITS = ["hearts", "diamonds", "clubs", "spades"];
-	SoltaireModel.prototype.SUIT_COLOR = { hearts : "red",
+	SolitaireModel.prototype.SUITS = ["hearts", "diamonds", "clubs", "spades"];
+	SolitaireModel.prototype.SUIT_COLOR = { hearts : "red",
 				  diamonds : "red",
 				  clubs : "black",
 				  spades : "black"
@@ -91,9 +91,9 @@
 		var deck = [];
 		if(deckType === "standard-deck")
 		{
-			for(var suitIndex = 0; suitIndex < SUITS.length; suitIndex++)
+			for(var suitIndex = 0; suitIndex < this.SUITS.length; suitIndex++)
 			{
-				var suit = SUITS[suitIndex];
+				var suit = this.SUITS[suitIndex];
 				for(var rank = 1; rank <= 13; rank++)
 				{
 					deck.push(new SolitaireCard(suit, rank, false));
@@ -164,6 +164,8 @@
 				target.facingUp = false;
 			else
 				throw new Error("RuleDefinition: invalid argument " + args[0] + " on command " + action.command);
+
+			this.onCardUpdated(target);
 		}
 		else if(action.command === 'move')
 		{
@@ -175,10 +177,12 @@
 				target.facingUp = false;
 			else
 				throw new Error("RuleDefinition: invalid argument " + args[1] + " on command " + action.command);
+
+			this.onCardUpdated(target);
 		}
 		else if(action.command === 'win')
 		{
-			this.onGmeWon();
+			this.onGameWon();
 		}
 		else
 		{
@@ -303,7 +307,7 @@
 			case 'suit':
 				return target.suit;
 			case 'color':
-				return SUIT_COLOR[target.suit];
+				return this.SUIT_COLOR[target.suit];
 			case 'rank':
 				return target.rank;
 			case 'facing':
