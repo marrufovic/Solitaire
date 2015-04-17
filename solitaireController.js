@@ -18,7 +18,7 @@
 		this.view.onCardMoved = function(card, pile) { _this.model.moveCard(card, pile); };
 		this.view.onCardActivated = function(card) { _this.model.activateCard(card); };
 
-		this.model.onNewGameReady = function(piles) { _this.view.onNewGame(piles); }
+		this.model.onNewGameReady = function(piles, gridSize) { _this.view.onNewGame(piles, gridSize); }
 		this.model.onCardMoved = function(card, oldPile, newPile) { _this.view.onModelMovedCard(card, oldPile, newPile); };
 		this.model.onCardUpdated = function(card) { _this.view.onModelUpdatedCard(card); };
 		this.model.onGameWon = function() { _this.view.onGameWon(); };

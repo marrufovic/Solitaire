@@ -69,7 +69,7 @@
 		for(var i = 0; i < this.game.layout.piles.length; i++)
 		{
 			var pile = this.game.layout.piles[i];
-			var newPile = new SolitairePile(pile.id, pile.pileType);
+			var newPile = new SolitairePile(pile.id, pile.pileType, pile.position);
 			for(var j = 0; j < pile.count; j++)
 			{
 				newPile.putCard(deck[deckIndex++]);
@@ -82,7 +82,7 @@
 			console.log("RuleDef warning: some cards undealt.");
 		}
 
-		this.onNewGameReady();
+		this.onNewGameReady(this.piles, this.game.layout.tableGrid);
 
 	};
 
@@ -96,7 +96,7 @@
 				var suit = SUITS[suitIndex];
 				for(var rank = 0; rank < 13; rank++)
 				{
-					deck.push(new SolitaireCard(suit, rank, false));
+					deck.push(new SolitaireCard(suit, rank, true));
 				}
 			}
 		}
@@ -127,7 +127,7 @@
 
 	SolitaireModel.prototype.canDropCard = function(card, pile, pos)
 	{
-		var dropRules = this.game.rules.pileTypes[card.pile.pileType].drop;
+		var dropRules = this.game.rules.pileTypes[pile.pileType].drop;
 		var dropTarget = pile.peekCard(pos);
 		return this._evaluateRule(dropRules, { held : card, pile : pile, dropTarget : dropTarget });
 	};
@@ -416,10 +416,11 @@
 
 	window.SolitaireModel = SolitaireModel;
 
-	var SolitairePile = function(pileId, pileType)
+	var SolitairePile = function(pileId, pileType, position)
 	{
 		this.pileId = pileId;
 		this.pileType = pileType;
+		this.position = position;
 
 		this.pile = [];
 	};
@@ -481,5 +482,7 @@
 		this.rank = rank;
 		this.facingUp = facingUp;
 	};
+
+	window.SolitaireCard = SolitaireCard;
 
 })(window);

@@ -9,6 +9,7 @@
 	{
 		this.model = model;
 		//initialize pixi, view variables, etc
+		this.piles = {};
 
 		this.onCardMoved = null;
 		this.onCardActivated = null;
@@ -20,16 +21,22 @@
 	};
 
 
-	SolitaireView.prototype.onNewGame = function(piles)
+	//piles: associative array of pileId=>SolitairePile
+	//gridSize: size of the display grid as object, e.g. {"width" : 8, "height" : 6}
+	SolitaireView.prototype.onNewGame = function(piles, gridSize)
 	{
 		for (var pileId in piles)
 		{
     		if (piles.hasOwnProperty(pileId))
     		{
         		var pile = piles[pileId];
+        		var pileView = new SolitairePileView(pile);
+        		this.piles[pileId] = pileView;
         		for(var i = 0; i < pile.getCount(); i++)
         		{
         			var card = pile.peekCard(i);
+        			var cardView = new SolitaireCardView(card);
+        			pileView.cards.push(cardView);
         		}
     		}
     	}
@@ -52,6 +59,21 @@
 
 	window.SolitaireView = SolitaireView;
 
+
+	var SolitairePileView = function(pile)
+	{
+		this.pile = pile;
+		this.cards = [];
+	};
+
+	var SolitaireCardView = function(card)
+	{
+		this.card = card;
+
+		//this.card.suit
+		//this.card.rank
+		//this.card.facingUp;
+	};
 
 })(window);
 
