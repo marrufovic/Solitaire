@@ -10,13 +10,45 @@
 		this.model = model;
 		//initialize pixi, view variables, etc
 
-		this.onCardDropped = null;
-	}
+		this.onCardMoved = null;
+		this.onCardActivated = null;
+	};
 
 	SolitaireView.prototype.moveCard = function(card, pile)
 	{
 		console.log("view: model moved card");
-	}
+	};
+
+
+	SolitaireView.prototype.onNewGame = function(piles)
+	{
+		for (var pileId in piles)
+		{
+    		if (piles.hasOwnProperty(pileId))
+    		{
+        		var pile = piles[pileId];
+        		for(var i = 0; i < pile.getCount(); i++)
+        		{
+        			var card = pile.peekCard(i);
+        		}
+    		}
+    	}
+	};
+
+	SolitaireView.prototype.onModelMovedCard = function(card, oldPile, newPile)
+	{
+
+	};
+
+	SolitaireView.prototype.onModelUpdatedCard = function(card)
+	{
+
+	};
+
+	SolitaireView.prototype.onGameWon = function()
+	{
+
+	};
 
 	window.SolitaireView = SolitaireView;
 

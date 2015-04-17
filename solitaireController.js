@@ -12,18 +12,17 @@
 		this.model = model;
 		this.view = view;
 
-		//use closure beacause if we just set onCardDropped to _cardDropped, "this" would refer to the view
+		//use closure beacause if we just set onCardMoved to _cardMoved, "this" would refer to the view
 		//alternatively we could use function.bind
-		this.view.onCardDropped = function(card, pile) { _this._cardDropped(card,pile); };
-	}
 
-	SolitaireController.prototype._cardDropped = function(card, pile)
-	{
-		console.log("controller: view dropped card");
-		if(this.model.moveCard(card,pile))
-		{
-			this.view.moveCard(card, pile);
-		}
+		this.view.onCardMoved = function(card, pile) { _this.model.moveCard(card, pile); };
+		this.view.onCardActivated = function(card) { _this.model.activateCard(card); };
+
+		this.model.onNewGameReady = function(piles) { _this.view.onNewGame(piles); }
+		this.model.onCardMoved = function(card, oldPile, newPile) { _this.view.onModelMovedCard(card, oldPile, newPile); };
+		this.model.onCardUpdated = function(card) { _this.view.onModelUpdatedCard(card); };
+		this.model.onGameWon = function() { _this.view.onGameWon(); };
+
 	}
 
 	window.SolitaireController = SolitaireController;

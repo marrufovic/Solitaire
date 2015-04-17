@@ -33,6 +33,10 @@
 	//classes
 	var SolitaireModel = function()
 	{
+		this.onNewGameReady = null;
+		this.onCardMoved = null;
+		this.onCardUpdated = null;
+		this.onGameWon = null;
 	};
 
 	SolitaireModel.prototype.newGame = function(gameRules)
@@ -65,7 +69,7 @@
 		for(var i = 0; i < this.game.layout.piles.length; i++)
 		{
 			var pile = this.game.layout.piles[i];
-			var newPile = new SolitairePile(pile.pileType);
+			var newPile = new SolitairePile(pile.id, pile.pileType);
 			for(var j = 0; j < pile.count; j++)
 			{
 				newPile.putCard(deck[deckIndex++]);
@@ -77,6 +81,9 @@
 		{
 			console.log("RuleDef warning: some cards undealt.");
 		}
+
+		this.onNewGameReady();
+
 	};
 
 	SolitaireModel.prototype._makeDeck = function(deckType)
@@ -398,12 +405,20 @@
 		pile.putCard(card, pos);
 		//run drop from triggers
 		//run drop to triggers		
+
+		this.onCardMoved(card);
+	};
+
+	SolitaireModel.prototype.activateCard = function(card)
+	{
+		
 	};
 
 	window.SolitaireModel = SolitaireModel;
 
-	var SolitairePile = function(pileType)
+	var SolitairePile = function(pileId, pileType)
 	{
+		this.pileId = pileId;
 		this.pileType = pileType;
 
 		this.pile = [];
