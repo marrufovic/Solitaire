@@ -4,13 +4,13 @@
 
 (function(window) {
 
+    
 	//classes
 	var SolitaireView = function(model)
 	{
 		this.model = model;
-	
-	       
-
+	        
+	      
 	        // Dictionary that will hold all of our cards
 	        this.textures = {};
 
@@ -36,10 +36,10 @@
 		    var rank = null;
 
 		    // loop through all the cards in that suit and set the image 
-		    for(var j = 1; i < 14; j++)
+		    for(var j = 1; j < 14; j++)
 		    {
 			rank = j; 
-			this.textures{suit+rank: PIXI.Texture.fromImage("images/" + suit + "/" + rank + ".png")};
+			this.textures[suit+rank] = PIXI.Texture.fromImage("images/" + suit + "/" + rank + ".png");
 		    }   
                 }   
 	        
@@ -56,10 +56,16 @@
 	        requestAnimFrame( animate );
 	        
 	        
-	      
+	        var check = true; 
 	        // Pass in the image that is associated with the card
 	        SolitaireView.prototype.createCard = function(x, y, texture)
 	        {
+		    x *= 100; 
+		    if (check)
+			{
+			    alert(x + " " + y);
+			    check = false; 
+			}
 		    var card = new PIXI.Sprite(texture);
 		
 		    card.interactive = true;
@@ -190,16 +196,16 @@
 	{
 		// 1 = ace 2= 2....king = 13
 	        // clubs diamonds hearts spades
-		  
-		this.card.rank
-		this.card.facingUp;
+		this.card = card;
+		//this.card.rank
+		//this.card.facingUp;
 	        var texture = solitaireView.textures[this.card.suit + this.card.rank]; 
 	        
 	        // this.card.pile.getCardPosition(this.card) - returns index of what card position is of the card on the pile 
 	        // 0 is bottom card, top is length -1 
 	        // 
 	    
-	        solitaireView.createCard(this.card.pile.x, this.card.pile.y, texture);
+	        solitaireView.createCard(this.card.pile.position.x, this.card.pile.position.y, texture);
 	};
 
 })(window);
