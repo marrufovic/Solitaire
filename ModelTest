@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Testing Solitaire Model</title>
+
+    <script src="solitaireModel.js"></script>
+    <script src="rules/klondike3.json"></script>
+
+    <script>
+        // test if Shuffle function works correctly.
+        var testShuffle = function () {
+            var array = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"];
+            for (i = 0; i < 10; i++) {
+                var newArray = shuffle(array);
+                var count = 0;
+                for (j = 0; j < array.length; j++) {
+                    if (array[j] === newArray[j]) {
+                        count++;
+                    }
+                    if (!contains(array, newArray[j])) {
+                        console.log("Element generated is out of range," + newArray[j]);
+                    }
+                }
+                if (count > 0) {
+                    console.log("Did not randomize the array correctly, " + count + " elements are in the same position.");
+                }
+            }
+
+        };
+
+        //checks if array 'a' contains the object 'obj'.
+        function contains(a, obj) 
+        {
+            var i = a.length;
+            while (i--) 
+            {
+                if (a[i] === obj) 
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // test make Desk function
+
+        function testMakeDeck(deckType) {
+
+        }
+
+        // test evaulateAction function
+        function testEvaluateAction(action, context) {
+
+        }
+
+        // test canDropCard function
+        function testCanDropCard(card, pile, pos) {
+
+        }
+
+        // test canDropCard function
+        function testCanGrabCard(card) {
+
+        }
+    </script>
+</head>
+<body>
+    <h1>Testing Solitaire model functions</h1>
+</body>
+</html>
