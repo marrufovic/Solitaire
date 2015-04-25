@@ -46,7 +46,7 @@
 		    }   
                 }   
 	        
-
+	        this.textures["facedown"] = PIXI.Texture.fromImage("images/backOfCard.png");
 
 	        //initialize pixi, view variables, etc
 	        var stage = new PIXI.Stage(0xF2343F, true);
@@ -62,12 +62,43 @@
 	        
 	        
 	        var check = true;
-	        var current_pile = null;
+	        var current_pile;
+	        var y_offset = 1.0; 
+	        var x_offset = 1.0; 
 
 	        // Pass in the image that is associated with the card
-	        SolitaireView.prototype.createCard = function(x, y, texture)
+	        SolitaireView.prototype.createCard = function(x, y, texture, pile_id, facing_up)
 	        {
-		    console.log("x: " + x + " y: " + y);
+		    //console.log("x: " + x + " y: " + y + " pileID: " + pile_id);
+		    if (typeof current_pile === 'undefined')
+			current_pile = pile_id;
+		    else if (current_pile !== pile_id)
+		    {
+			current_pile = pile_id;
+			y_offset = 1.0; 
+			//y *= y_offset; 
+		    }
+		    else if (pile_id === "stock1")
+		    {
+			if (facing_up)
+			    x_offset = 1.7;
+			else 
+			    x_offset = 1.0; 
+			current_pile = pile_id; 
+			//alert(current_pile + " and  " + pile_id); 
+			y_offset = 1.0; 
+		    }
+		    else if (current_pile === pile_id)
+		    {
+			//alert("in here");
+			y_offset += 0.1; 
+			//y *= y_offset; 
+		
+		    }
+		    else
+		    {
+			y_offset = 1.0; 
+		    }
 		    var card = new PIXI.Sprite(texture);
 		    
 		    //current 
@@ -75,9 +106,9 @@
 		    if(y === 0)
 			y = window.innerHeight * .1 
 		    else 
-			y = window.innerHeight * .3;
+			y = window.innerHeight * y_offset * .3;
 
-		    x = ((x+1)/8)* window.innerWidth; 
+		    x = ((x+1)/8)* window.innerWidth * x_offset; 
 
 
 		    card.interactive = true;
@@ -102,8 +133,21 @@
 			this.alpha = 0.9;
 			this.dragging = true;
 			this.sx = this.data.getLocalPosition(card).x * card.scale.x;
-			this.sy = this.data.getLocalPosition(card).y * card.scale.y;};
+			this.sy = this.data.getLocalPosition(card).y * card.scale.y;
+			this.bringToFront();
+			
+		    };
 		    
+
+		    PIXI.Sprite.prototype.bringToFront = function(){
+			if(this.parent){
+			    var parent = this.parent;
+			    parent.removeChild(this);
+			    parent.addChild(this);
+			}
+			
+		    }
+
 		    // set the events for when the mouse is released or a touch is released
 		    card.mouseup = card.mouseupoutside = card.touchend = card.touchendoutside = function(data)
 		    {
@@ -204,6 +248,7 @@
 		this.pile = pile;
 		this.cards = [];
 	};
+       
 
 	var SolitaireCardView = function(card, solitaireView)
 	{
@@ -212,13 +257,16 @@
 		this.card = card;
 		//this.card.rank
 		//this.card.facingUp;
-	        var texture = solitaireView.textures[this.card.suit + this.card.rank]; 
-	        
+	        var texture = null;
+	        console.log(this.card.pile.pileId);
+	        if (this.card.facingUp)
+		    texture = solitaireView.textures[this.card.suit + this.card.rank]; 
+	        else 
+		    texture = solitaireView.textures["facedown"]; 
+	       
 	        // this.card.pile.getCardPosition(this.card) - returns index of what card position is of the card on the pile 
 	        // 0 is bottom card, top is length -1 
-	        // 
-	    
-	        solitaireView.createCard(this.card.pile.position.x, this.card.pile.position.y, texture);
+                solitaireView.createCard(this.card.pile.position.x, this.card.pile.position.y, texture, this.card.pile.pileId, this.card.facingUp); 
 	};
 
 })(window);
