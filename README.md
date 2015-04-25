@@ -104,7 +104,7 @@ as the id and the default values for all other attributes.
 | idType   | string   |   "id"  |
 | selector | Selector |  "this" |
 
-valid ids: grabTarget, dropTarget, held, pile, [pileId]
+valid ids: grabTarget, dropTarget, activateTarget, held, pile, [pileId]
 valid idTypes: id, [pileType]
 
 ##### Selector

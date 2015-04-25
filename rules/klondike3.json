@@ -46,9 +46,9 @@
 							"facing" : "down" },
 				"stackSize" : 1,
 				"activate" : [{ "rule" : { "target" : "pile", "condition" : {"attribute" : "count", "relation" : "=", "value" : "0"}}, 
-								"action" : {"command" : "move", "target" : {"id" : "stockPlay", "selector" : "all"}, "arguments" : ["pile", "down"]}},
+								"action" : {"command" : "move", "target" : {"id" : "stockPlay", "selector" : "all"}, "arguments" : ["pile", "top", "down"]}},
 							  { "rule" : { "target" : "pile", "condition" : {"attribute" : "count", "relation" : ">", "value" : "0"}},
-							  		"action" : { "command" : "move", "target" : {"id" : "pile", "selector" : { "id" : "top", "count" : "3"}}, "arguments" : ["stockPlay", "up"]}}
+							  		"action" : { "command" : "move", "target" : {"id" : "pile", "selector" : { "id" : "top", "count" : "3"}}, "arguments" : ["stockPlay", "top", "up"]}}
 				]
 			},
 			"stockPlayPile": {

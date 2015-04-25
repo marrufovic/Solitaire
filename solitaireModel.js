@@ -199,10 +199,15 @@
 		else if(action.command === 'move')
 		{
 			var target2 = this._findTarget(args[0], context);
-			this.moveCard(target, target2);
-			if(args[1] === 'up')
+			if(!Array.isArray(target))
+				target = [target];
+			for(var i = 0; i < target.length; i++)
+			{
+				this.moveCard(target[i], target2, args[1]);
+			}
+			if(args[2] === 'up')
 				target.facingUp = true;
-			else if(args[1] === 'down')
+			else if(args[2] === 'down')
 				target.facingUp = false;
 			else
 				throw new Error("RuleDefinition: invalid argument " + args[1] + " on command " + action.command);
@@ -305,19 +310,19 @@
 
 		if(condition.relation === '=')
 		{
-			return rhs === lhs;
+			return lhs === rhs;
 		}
 		else if(condition.relation === '!=')
 		{
-			return rhs !== lhs;
+			return lhs !== rhs;
 		}
 		else if(condition.relation === '<')
 		{
-			return rhs < lhs;
+			return lhs < rhs;
 		}
 		else if(condition.relation === '>')
 		{
-			return rhs > lhs;
+			return lhs > rhs;
 		}
 		else
 		{
@@ -491,30 +496,31 @@
 	SolitaireModel.prototype.moveCard = function(card, pile, pos)
 	{
 		var triggers = this.game.rules.pileTypes[card.pile.pileType].triggers;
+		var dropTarget = pile.peekCard(pos);
 
 		card.pile.removeCard(card.pile.getCardPosition(card));
 		if(typeof triggers !== 'undefined')
 		{
 			//run grab triggers
-			this._evaluateRuleActionPairs(triggers.onGrab, context);
+			this._evaluateRuleActionPairs(triggers.onGrab, { grabTarget : card, pile : card.pile });
 		}
 
 		pile.putCard(card, pos);
 		if(typeof triggers !== 'undefined')
 		{
 			//run drop from triggers
-			this._evaluateRuleActionPairs(triggers.onDropFrom, context);
+			this._evaluateRuleActionPairs(triggers.onDropFrom, { dropTarget : dropTarget, held : card, pile : card.pile});
 			//run drop to triggers		
-			this._evaluateRuleActionPairs(triggers.onDropOnto, context);
+			this._evaluateRuleActionPairs(triggers.onDropOnto, { dropTarget : dropTarget, held : card, pile : pile });
 		}
 
 		this.onCardMoved(card);
 	};
 
-	SolitaireModel.prototype.activateCard = function(card)
+	SolitaireModel.prototype.activatePile = function(pile, card)
 	{
-		var activateRule = this.game.rules.pileTypes[card.pile.pileType].activate;
-		this._evaluateRuleActionPairs(activateRule);
+		var activateRule = this.game.rules.pileTypes[pile.pileType].activate;
+		this._evaluateRuleActionPairs(activateRule, { pile: pile, activateTarget : card});
 	};
 
 	window.SolitaireModel = SolitaireModel;
