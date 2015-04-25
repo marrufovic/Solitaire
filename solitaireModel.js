@@ -69,12 +69,34 @@
 		for(var i = 0; i < this.game.layout.piles.length; i++)
 		{
 			var pile = this.game.layout.piles[i];
-			var newPile = new SolitairePile(pile.id, pile.pileType, pile.position);
+			var stackSize = this.game.rules.pileTypes[pile.pileType].stackSize;
+			if(typeof stackSize === 'undefined')
+				stackSize = Number.POSITIVE_INFINITY;
+			var newPile = new SolitairePile(pile.id, pile.pileType, pile.position, stackSize);
+			var facingUp = true;
+			var setupRules = this.game.rules.pileTypes[pile.pileType].setup;
 			for(var j = 0; j < pile.count; j++)
 			{
 				var card = deck[deckIndex++];
-				if(j == pile.count - 1)
+
+				if(setupRules.facing === 'up')
 					card.facingUp = true;
+				else if(setupRules.facing === 'down')
+					card.facingUp = false;
+				else if(setupRules.facing === 'only-top-up')
+				{
+					if(j == pile.count - 1)
+						card.facingUp = true;
+					else
+						card.facingUp = false;
+				}
+				else if(setupRules.facing === 'only-top-down')
+				{
+					if(j == pile.count - 1)
+						card.facingUp = false;
+					else
+						card.facingUp = true;
+				}
 				newPile.putCard(card);
 			}
 			this.piles[pile.id] = newPile;
@@ -497,11 +519,12 @@
 
 	window.SolitaireModel = SolitaireModel;
 
-	var SolitairePile = function(pileId, pileType, position)
+	var SolitairePile = function(pileId, pileType, position, stackSize)
 	{
 		this.pileId = pileId;
 		this.pileType = pileType;
 		this.position = position;
+		this.stackSize = stackSize;
 
 		this.pile = [];
 	};
