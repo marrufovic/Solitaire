@@ -125,12 +125,16 @@
 	SolitaireModel.prototype.canGrabCard = function(card)
 	{
 		var grabRules = this.game.rules.pileTypes[card.pile.pileType].grab;
+		if(typeof grabRules === 'undefined')
+			return true;
 		return this._evaluateRule(grabRules, { grabTarget : card });
 	};
 
 	SolitaireModel.prototype.canDropCard = function(card, pile, pos)
 	{
 		var dropRules = this.game.rules.pileTypes[pile.pileType].drop;
+		if(typeof dropRules === 'undefined')
+			return true;
 		var dropTarget = pile.peekCard(pos);
 		return this._evaluateRule(dropRules, { held : card, pile : pile, dropTarget : dropTarget });
 	};
@@ -466,7 +470,7 @@
 	{
 		var triggers = this.game.rules.pileTypes[card.pile.pileType].triggers;
 
-		card.pile.removeCard(card);
+		card.pile.removeCard(card.pile.getCardPosition(card));
 		if(typeof triggers !== 'undefined')
 		{
 			//run grab triggers

@@ -1,0 +1,20 @@
+{
+	"name" : "Test",
+	"layout" : {
+		"cards" : { "cardType" : "standard-deck", "count" : 1},
+		"tableGrid" : {"width" : 7, "height" : 7},
+		"piles" : [
+			{ "id" : "pile1", "pileType" : "playPile", "count" : 26, "position" : { "x" : 0, "y" : 1 }},
+			{ "id" : "pile2", "pileType" : "playPile", "count" : 26, "position" : { "x" : 1, "y" : 1 }}
+			
+		]
+	},
+
+	"rules" : {
+
+		"pileTypes" : {
+			"playPile" : {
+			}
+		}
+	}
+}
