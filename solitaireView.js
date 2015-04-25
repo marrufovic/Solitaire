@@ -70,7 +70,7 @@
 		    console.log("x: " + x + " y: " + y);
 		    var card = new PIXI.Sprite(texture);
 		    
-		    current 
+		    //current 
 		    
 		    if(y === 0)
 			y = window.innerHeight * .1 
@@ -258,7 +258,7 @@ function buildBoard(){
 /**
  * resize the c4 sprite so that it takes up most of the screen
  *
- */
+ *
 function resize (event)
 {
 
@@ -343,12 +343,12 @@ function resize (event)
 //c4.dirty = true;
 
 };
+*/
 
 
 
 
-
-
+ 
 
 
 
@@ -361,3 +361,4 @@ function waste(){
     var cardToDisplay = array[array.length - 1];
     document.getElementById('deck').innerHTML = cardToDisplay;
 }
+
