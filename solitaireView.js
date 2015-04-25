@@ -1,6 +1,9 @@
-//SolitaireView.js
-// James Lundgren-testing again making another change
-// Victor Marrufo
+/**
+ * SolitaireView.js
+ * Authors: James Lundgren, Victor Marrufo, Elliot Hatch, Dharani Adhikari
+ * 
+ */
+
 
 (function(window) {
 
@@ -47,27 +50,36 @@
 
 	        //initialize pixi, view variables, etc
 	        var stage = new PIXI.Stage(0xF2343F, true);
-	        var renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight, null);
+	        var renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight, document.getElementById("game_board"));
 
 	        document.body.appendChild(renderer.view);
                 renderer.view.style.position = "absolute";
                 renderer.view.style.top = "0px";
                 renderer.view.style.left = "0px";
+//	        renderer.view.style.width= "800px";	        
+//	        renderer.view.style.height= "400px";
 	        requestAnimFrame( animate );
 	        
 	        
-	        var check = true; 
+	        var check = true;
+	        var current_pile = null;
+
 	        // Pass in the image that is associated with the card
 	        SolitaireView.prototype.createCard = function(x, y, texture)
 	        {
-		    x *= 100; 
-		    if (check)
-			{
-			    alert(x + " " + y);
-			    check = false; 
-			}
+		    console.log("x: " + x + " y: " + y);
 		    var card = new PIXI.Sprite(texture);
-		
+		    
+		    current 
+		    
+		    if(y === 0)
+			y = window.innerHeight * .1 
+		    else 
+			y = window.innerHeight * .3;
+
+		    x = ((x+1)/8)* window.innerWidth; 
+
+
 		    card.interactive = true;
 		    
 		    // this button mode will mean the hand cursor appears when you rollover the card with your mouse
@@ -77,7 +89,7 @@
 		    card.anchor.x = 0.5;
 		    card.anchor.y = 0.5;
 		    // make it a bit bigger, so its easier to touch
-		    card.scale.x = card.scale.y = 0.5;
+		    card.scale.x = card.scale.y = 1.0;
 		    
 		    // use the mousedown and touchstart
 		    card.mousedown = card.touchstart = function(data)
@@ -121,6 +133,7 @@
 		    card.position.x = x;
 		    card.position.y = y;
 		    
+		    console.log(stage.width);
 		    // add it to the stage
 		    stage.addChild(card);
 		    
@@ -239,6 +252,105 @@ function buildBoard(){
     deck();
     waste();
 }
+
+
+
+/**
+ * resize the c4 sprite so that it takes up most of the screen
+ *
+ */
+function resize (event)
+{
+
+    console.log("--------------------");
+    console.log("  Window Size: " + window.innerWidth + ", " + window.innerHeight);
+    console.log("  C4 current    x,y, w,h  " + c4.position.x + ", " + c4.position.y + ": "+ c4.width   + ", " + c4.height);
+
+    boundingbox.clear();
+    boundingbox.lineStyle(2,0xffffff);
+    boundingbox.beginFill(0xFFFF0B, 0);
+    boundingbox.drawRect(0,0,window.innerWidth, window.innerHeight);
+    boundingbox.endFill();
+
+
+    //
+    // Resize Renderer Window
+    //
+    renderer.resize(window.innerWidth, window.innerHeight);
+
+    //
+    // find current c4 bounds and resize/reposition c4 board
+    //
+//    var c4_bounds = PIXI.DisplayObjectContainer.prototype.getBounds.call(c4).clone();
+
+    //
+    // need to compute new scale based on original size of C4 sprite, so 
+    // put back to original size
+    //
+
+    c4.scale.x = 1;  // WARNING: must compute center based on original size, not previous scaled size
+    c4.scale.y = 1;
+
+    var dw = (window.innerWidth-100)/c4.width; //c4_bounds
+    var dh = (window.innerHeight-100)/c4.height; // c4_bounds
+    var dm = Math.min(dw,dh);
+    
+    c4.scale.x = dm;
+    c4.scale.y = dm;
+
+    //
+    // find current c4 bounds and resize/reposition c4 board
+    //
+//    var c4_bounds = PIXI.DisplayObjectContainer.prototype.getBounds.call(c4).clone();
+    c4.position.x = (window.innerWidth/2) - (c4.width/2) +100 ;
+    c4.position.y = (window.innerHeight/2) - (c4.height/2) -15;
+
+
+
+//    renderer.render(stage);     // render the stage (required to recompute the acutal size of the sprite)
+//    c4_bounds = PIXI.DisplayObjectContainer.prototype.getBounds.call(c4).clone();
+    
+
+//c4.position.x = 0;
+//c4.position.y = 0;
+
+//    c4.updateTransform();
+
+//    renderer.render(stage);     // render the stage (required to recompute the acutal size of the sprite)
+//    c4_bounds = PIXI.DisplayObjectContainer.prototype.getBounds.call(c4).clone();
+
+//    console.log("  C4 bounds x,y, w,h  " + c4_bounds.x + ", " + c4_bounds.y + ": "+ c4_bounds.width   + ", " + c4_bounds.height);
+    console.log("  C4 final  x,y, w,h  " + c4.position.x + ", " + c4.position.y + ": "+ c4.width   + ", " + c4.height);
+
+    console.log("   scale: " + dw + ", " + dh);
+
+
+    c4_bounds = PIXI.DisplayObjectContainer.prototype.getBounds.call(c4).clone();
+    console.log("  C4 final bounds x,y, w,h  " + c4_bounds.x + ", " + c4_bounds.y + ": "+ c4_bounds.width   + ", " + c4_bounds.height);
+
+//    boundingbox.position.x = c4.position.x;
+//    boundingbox.position.y = c4.position.y;
+    
+//    boundingbox.clear();
+//    boundingbox.lineStyle(2,0xffffff);
+//    boundingbox.beginFill(0xFFFF0B, .1);
+//    boundingbox.drawRect(c4_bounds.x, c4_bounds.y, c4_bounds.width, c4_bounds.height);
+//    boundingbox.endFill();
+
+
+    stage.updateTransform();
+//renderer.clearBeforeRender = true;
+//c4.dirty = true;
+
+};
+
+
+
+
+
+
+
+
 
 function deck(){
     var cardToDisplay = "<img src='images/backOfCard.jpg' width='110' height='130' alt='deck'/>";
