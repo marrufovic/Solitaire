@@ -26,9 +26,7 @@
 		"pileTypes" : {
 			"playPile" : {
 				"setup" : "random down",
-				"grab" :  { "AND" : [{ "target" : "grabTarget", "condition" : { "attribute" : "facing", "relation" : "=", "value" : "up" }},
-										{ "target" : { "id" : "grabTarget", "selector" : "pos-1"}, "condition" : { "attribute" : "color", "relation" : "=", "value" : "alt", "target" : "grabTarget"}} ] 
-				},
+				"grab" :  { "target" : "grabTarget", "condition" : { "attribute" : "facing", "relation" : "=", "value" : "up" }},
 				"drop" : { "OR" : [{ "AND" : [{ "target" : "pile", "condition" : {"attribute" : "count", "relation" : "=", "value" : "0"}},
 												  { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "13"}} ]}, 
 									   { "AND" : [{ "target" : "held", "condition" : {"attribute" : "color", "relation" : "=", "value" : "alt", "target" : {"id" : "pile", "selector" : "top"}}},

@@ -67,9 +67,18 @@
 	        var x_offset = 1.0; 
 
 	        // Pass in the image that is associated with the card
-	        SolitaireView.prototype.createCard = function(x, y, texture, pile_id, facing_up)
+	        //SolitaireView.prototype.createCard = function(x, y, texture, pile_id, facing_up)
+	        SolitaireView.prototype.createCard = function(card_obj, texture)
 	        {
-		    //console.log("x: " + x + " y: " + y + " pileID: " + pile_id);
+		
+		    console.log(card_obj); 
+
+		    var facing_up = card_obj.facingUp; 
+		    var pile_id = card_obj.pile.pileId;
+		    var card = new PIXI.Sprite(texture);
+		    var y = card_obj.pile.position.y; 
+		    var x = card_obj.pile.position.x; 
+		    
 		    if (typeof current_pile === 'undefined')
 			current_pile = pile_id;
 		    else if (current_pile !== pile_id)
@@ -99,15 +108,13 @@
 		    {
 			y_offset = 1.0; 
 		    }
-		    var card = new PIXI.Sprite(texture);
-		    
-		    //current 
 		    
 		    if(y === 0)
 			y = window.innerHeight * .1 
 		    else 
 			y = window.innerHeight * y_offset * .3;
 
+		    
 		    x = ((x+1)/8)* window.innerWidth * x_offset; 
 
 
@@ -131,10 +138,14 @@
 			// we want to track the movement of this particular touch
 			this.data = data;
 			this.alpha = 0.9;
-			this.dragging = true;
+			if (model.canGrabCard(card_obj))
+			    this.dragging = true;
+			else 
+			    this.dragging = false; 
 			this.sx = this.data.getLocalPosition(card).x * card.scale.x;
 			this.sy = this.data.getLocalPosition(card).y * card.scale.y;
-			this.bringToFront();
+			if (model.canGrabCard(card_obj))
+			    this.bringToFront();
 			
 		    };
 		    
@@ -266,7 +277,8 @@
 	       
 	        // this.card.pile.getCardPosition(this.card) - returns index of what card position is of the card on the pile 
 	        // 0 is bottom card, top is length -1 
-                solitaireView.createCard(this.card.pile.position.x, this.card.pile.position.y, texture, this.card.pile.pileId, this.card.facingUp); 
+	        solitaireView.createCard(this.card, texture); 
+                // solitaireView.createCard(this.card.pile.position.x, this.card.pile.position.y, texture, this.card.pile.pileId, this.card.facingUp); 
 	};
 
 })(window);
