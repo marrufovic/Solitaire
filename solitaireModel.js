@@ -25,6 +25,7 @@
 	//classes
 	var SolitaireModel = function()
 	{
+		//events
 		this.onNewGameReady = null;
 		this.onCardMoved = null;
 		this.onCardUpdated = null;
@@ -161,6 +162,7 @@
 		return this._evaluateRule(dropRules, { held : card, pile : pile, dropTarget : dropTarget });
 	};
 
+	//For each rule-action pair, if the rule evaluates to true, then execute the action 
 	SolitaireModel.prototype._evaluateRuleActionPairs = function(ruleActionPairs, context)
 	{
 		if(typeof ruleActionPairs === 'undefined')
@@ -179,6 +181,7 @@
 		}
 	}
 
+	//execute an action, such as flipping card facing and moving cards
 	SolitaireModel.prototype._evaluateAction = function(action, context)
 	{
 		var target = this._findTarget(action.target, context);
@@ -226,7 +229,7 @@
 
 	//recursively evaluate a "rule" entry
 	//context: object that stores reference to model objects that will be needed in the rule parsing
-	//		e.g. - a "grab" rule must provide a 'target', "drop" must provide 'held', 'target', and 'pile'
+	//		e.g. - a "grab" rule must provide a 'grabTarget', "drop" must provide 'held', 'dropTarget', and 'pile'
 	//returns true/false
 	SolitaireModel.prototype._evaluateRule = function(rule, context)
 	{
@@ -330,6 +333,7 @@
 		}
 	};
 
+	//returns the value of an attribute, given the name of the attribute as a string, usually provided by a rule 'condition'
 	SolitaireModel.prototype._getAttributeValue = function(attribute, target)
 	{
 		switch(attribute)
@@ -525,6 +529,13 @@
 
 	window.SolitaireModel = SolitaireModel;
 
+	//class representing a single pile on the table
+	//all pile modifiers (putCard, peekCard, removeCard) take a 'pos' parameter
+	//if pos is undefined, selects the top card
+	//if pos is a string, valid selectors are: 'top', 'bot'
+	//if pos is a number, selects via index, where 0 is the bottom and length-1 is the top
+	//note that insertion places the card at the index, moving all cards above that index
+	//this means that putCard('top') inserts at the index pile.length, but peekCard('top') selects the card at pile.length-1
 	var SolitairePile = function(pileId, pileType, position, stackSize)
 	{
 		this.pileId = pileId;
@@ -592,6 +603,8 @@
 			return pos;
 	};
 
+	//represents a single card in the solitaire game
+	//all cards belong to a pile, this.pile is only null while actively moving a card in the moveCard function
 	var SolitaireCard = function(suit, rank, facingUp) {
 		this.pile = null;
 		this.suit = suit;
