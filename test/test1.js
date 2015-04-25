@@ -18,25 +18,30 @@ gameRules.loadGame("test1.json",
 	var pile1 = model.piles['pile1'];
 	var pile2 = model.piles['pile2'];
 
-	// while(pile1.getCount() > 0)
-	// {
-	// 	var card = pile1.peekCard();
-	// 	if(!model.canGrabCard(card))
-	// 	{
-	// 		result = false;
-	// 		break;
-	// 	}
+	while(pile1.getCount() > 0)
+	{
+		var card = pile1.peekCard();
+		if(!model.canGrabCard(card))
+		{
+			result = false;
+			break;
+		}
 
-	// 	model.moveCard(card, pile2);
+		model.moveCard(card, pile2);
 
-	// 	var movedCard = pile2.peekCard();
-	// 	if(movedCard !== card)
-	// 	{
-	// 		result = false;
-	// 		break;
-	// 	}
+		var movedCard = pile2.peekCard();
+		if(movedCard !== card)
+		{
+			result = false;
+			break;
+		}
 
-	// }
+	}
+	
+	if(pile2.getCount() !== 52)
+		result = false;
+
+
 
 	var testOutput = document.getElementById('test-result');
 	testOutput.innerHTML += "</br>" + output + result;

@@ -470,7 +470,7 @@
 	{
 		var triggers = this.game.rules.pileTypes[card.pile.pileType].triggers;
 
-		card.pile.removeCard(card);
+		card.pile.removeCard(card.pile.getCardPosition(card));
 		if(typeof triggers !== 'undefined')
 		{
 			//run grab triggers
