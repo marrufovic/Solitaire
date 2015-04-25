@@ -72,7 +72,10 @@
 			var newPile = new SolitairePile(pile.id, pile.pileType, pile.position);
 			for(var j = 0; j < pile.count; j++)
 			{
-				newPile.putCard(deck[deckIndex++]);
+				var card = deck[deckIndex++];
+				if(j == pile.count - 1)
+					card.facingUp = true;
+				newPile.putCard(card);
 			}
 			this.piles[pile.id] = newPile;
 		}
