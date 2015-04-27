@@ -74,7 +74,8 @@ onDropOnto occurs immediately after a successful drop onto this pile from anothe
 | rule     | Rule/Boolean Expression   |    -    |
 | action   | Action                    |    -    |
 
-If rule is omitted, the action can always be performed.
+If rule is omitted, the action can always be performed.  
+In rule-action pairs the rule can also be the string 'else'
 
 ##### Rule
 

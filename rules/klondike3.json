@@ -48,13 +48,13 @@
 				"fanCount" : 1,
 				"activate" : [{ "rule" : { "target" : "pile", "condition" : {"attribute" : "count", "relation" : "=", "value" : "0"}}, 
 								"action" : {"command" : "move", "target" : {"id" : "stockPlay", "selector" : "all"}, "arguments" : ["pile", "top", "down"]}},
-							  { "rule" : { "target" : "pile", "condition" : {"attribute" : "count", "relation" : ">", "value" : "0"}},
-							  		"action" : { "command" : "move", "target" : {"id" : "pile", "selector" : { "id" : "top", "count" : "3"}}, "arguments" : ["stockPlay", "top", "up"]}}
+							  { "rule" : "else",
+							  		"action" : { "command" : "move", "target" : {"id" : "pile", "selector" : { "id" : "top", "count" : 3}}, "arguments" : ["stockPlay", "top", "up"]}}
 				]
 			},
 			"stockPlayPile": {
 				"fanCount" : 3,
-				"fanDirecton" : "right",
+				"fanDirection" : "right",
 				"grab" : { "target" : "grabTarget", "condition" : {"attribute" : "position", "relation" : "=", "value" : "top"}
 				}
 			},

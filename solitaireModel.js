@@ -179,13 +179,25 @@
 
 		if(!Array.isArray(ruleActionPairs))
 			ruleActionPairs = [ruleActionPairs];
+
+		var lastTrue = false;
 		for(var i = 0; i < ruleActionPairs.length; i++)
 		{
 			var rule = ruleActionPairs[i].rule;
 			var action = ruleActionPairs[i].action;
-			if(typeof rule === 'undefined' || this._evaluateRule(rule, context))
+			if(rule === 'else')
 			{
+				if(lastTrue)
+					this._evaluateAction(action, context);
+			}
+			else if(typeof rule === 'undefined' || this._evaluateRule(rule, context))
+			{
+				lastTrue = true;
 				this._evaluateAction(action, context);
+			}
+			else
+			{
+				lastTrue = false;
 			}
 		}
 	}
@@ -312,42 +324,45 @@
 			var rhs = allRhs[i];
 			var objectComparison = false;
 			//transform the value of rhs and lhs based on parameters
-			if(condition.value === 'alt')
+			if(typeof condition.value === 'string')
 			{
-				objectComparison = true;
-				if(target2 === null && typeof condition.target === 'undefined')
-					continue;
-				if(condition.attribute !== 'color')
-					throw new Error("RuleDefinition: condition value " + condition.value + 
-						" not allowed on attribute  " + condition.attribute);
+				if(condition.value === 'alt')
+				{
+					objectComparison = true;
+					if(target2 === null && typeof condition.target === 'undefined')
+						continue;
+					if(condition.attribute !== 'color')
+						throw new Error("RuleDefinition: condition value " + condition.value + 
+							" not allowed on attribute  " + condition.attribute);
 
-				//set lhs to the last value
-				if(i > 0)
-					lhs = allRhs[i - 1];
+					//set lhs to the last value
+					if(i > 0)
+						lhs = allRhs[i - 1];
 
-				//alternate rhs color
-				if(rhs === 'red')
-					rhs = 'black';
-				else if(rhs === 'black')
-					rhs = 'red';
-			}
-			else if(condition.value === 'same')
-			{
-				objectComparison = true;
-			}
-			//note: on relatives we SUBTRACT the value instead of multiply, because we are "fixing" the RHS value to make it equal, less then, etc
-			else if(condition.value.slice(0,3) === 'run')
-			{
-				objectComparison = true;
-				var relativeValue = parseInt(condition.value.slice(3));
-				rhs -= relativeValue * (i + 1);
+					//alternate rhs color
+					if(rhs === 'red')
+						rhs = 'black';
+					else if(rhs === 'black')
+						rhs = 'red';
+				}
+				else if(condition.value === 'same')
+				{
+					objectComparison = true;
+				}
+				//note: on relatives we SUBTRACT the value instead of multiply, because we are "fixing" the RHS value to make it equal, less then, etc
+				else if(condition.value.slice(0,3) === 'run')
+				{
+					objectComparison = true;
+					var relativeValue = parseInt(condition.value.slice(3));
+					rhs -= relativeValue * (i + 1);
 
-			}
-			else if(condition.value.slice(0,1) === '+' || condition.value.slice(0,1) === '-')
-			{
-				objectComparison = true;
-				var relativeValue = parseInt(condition.value);
-				rhs -= relativeValue;
+				}
+				else if(condition.value.slice(0,1) === '+' || condition.value.slice(0,1) === '-')
+				{
+					objectComparison = true;
+					var relativeValue = parseInt(condition.value);
+					rhs -= relativeValue;
+				}
 			}
 
 			//automatically succeed on object comparisons if either target is null
@@ -465,7 +480,6 @@
 						targetSelector.count = Number.POSITIVE_INFINITY;
 					else
 						throw new Error("RuleDefinition: unknown count " + targetSelector.count + " on target " + targetId);
-
 				}
 			}
 		}
@@ -585,6 +599,18 @@
 
 				selection.push(targetObj.pile.peekCard(currentPosition));
 
+			}
+			targetObj = selection;
+		}
+		else if(targetSelector.id === 'all')
+		{
+			if(!(targetObj instanceof SolitairePile))
+				throw new Error("RuleDefinition: selector " + targetSelector.id + " not allowed on target " + targetId +
+									" of type " + targetObj.contructor);
+			var selection = [];
+			for(var i = 0; i < targetObj.getCount(); i++)
+			{
+				selection.push(targetObj.peekCard(i));
 			}
 			targetObj = selection;
 		}
