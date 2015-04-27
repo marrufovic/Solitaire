@@ -1,7 +1,8 @@
 //solitaireGame.js
 
 var gameRules = new SolitaireGameRules()
-gameRules.loadGame("rules/klondike3.json", 
+//gameRules.loadGame("rules/klondike3.json", 
+gameRules.loadGame("rules/freecell.json", 
 	function() {
 	var model = new SolitaireModel(gameRules);
 	var view = new SolitaireView(model);

@@ -117,7 +117,8 @@ for all other attributes.
 | id       | string   |    -    |
 | count    | int      |    1    |
 
-Valid selectorIds: pos[int], pos+[int], pos-[int], top, bot, top[int], bot[int], all
+Valid selectorIds: pos[int], pos+[int], pos-[int], top, bot, top[int], bot[int],
+above, below, all
 
 ##### Condition
 A Condition checks the state of a card or pile against a given value or 1 or more
@@ -133,12 +134,14 @@ other cards or piles, selected with the target attribute.
 Valid pile attributes: count
 Valid card attributes: suit, color, rank, facing, position
 
-Valid relations (where applicable): =, !=, <, >
+Valid relations (where applicable): =, !=, <, >, <=, >=
 
 Valid values (where applicable): red, black, hearts, diamonds, clubs, spades,
-[int] (e.g. 2), top, bot, alt, same, +[int] (e.g. -1), -[int] (e.g. +2)
+[int] (e.g. 2), alt, same, run+[int], run-[int] +[int] (e.g. -1), -[int] (e.g. +2)
 
-alt, same, +[int] and -[int] require the target attribute. +/-[int] is used for a value relative to the target, (e.g. -1 could mean one rank lower)
+alt, same, run+[int], run-[int] +[int] and -[int] require the target attribute.
+run+/-[int] is used for a relatively increasing/decreasing value (e.g. run-2 on selection of 3 cards could mean ranks 2 lower, 4 lower, and 6 lower than the original)
++/-[int] is used for a value relative to the target, (e.g. -1 could mean one rank lower)
 
 
 ##### Action

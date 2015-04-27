@@ -29,7 +29,8 @@
 
 				"setup" : { "cards" : "random",
 							"facing" : "only-top-up" },
-			    "grab" :  { "target" : "grabTarget", "condition" : { "attribute" : "facing", "relation" : "=", "value" : "up" }},
+			    "grab" :  { "target" : "grabTarget", "condition" : { "attribute" : "facing", "relation" : "=", "value" : "up" }
+			    },
 				
 				"drop" : { "OR" : [{ "AND" : [{ "target" : "pile", "condition" : {"attribute" : "count", "relation" : "=", "value" : "0"}},
 												  { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "13"}} ]}, 
@@ -44,7 +45,7 @@
 			"stockPile" : {
 				"setup" : { "cards" : "random",
 							"facing" : "down" },
-				"stackSize" : 1,
+				"fanCount" : 1,
 				"activate" : [{ "rule" : { "target" : "pile", "condition" : {"attribute" : "count", "relation" : "=", "value" : "0"}}, 
 								"action" : {"command" : "move", "target" : {"id" : "stockPlay", "selector" : "all"}, "arguments" : ["pile", "top", "down"]}},
 							  { "rule" : { "target" : "pile", "condition" : {"attribute" : "count", "relation" : ">", "value" : "0"}},
@@ -52,23 +53,22 @@
 				]
 			},
 			"stockPlayPile": {
-				"stackSize" : 3,
-				"grab" : {
-					"rule" : { "target" : "grabTarget", "condition" : {"attribute" : "position", "relation" : "=", "value" : "top"}}
+				"fanCount" : 3,
+				"fanDirecton" : "right",
+				"grab" : { "target" : "grabTarget", "condition" : {"attribute" : "position", "relation" : "=", "value" : "top"}
 				}
 			},
+
 			"winPile" : {
-				"grab" : {
-					"rule" : { "target" : "grabTarget", "condition" : {"attribute" : "position", "relation" : "=", "value" : "top"}
-					},
-				"drop" : {
-					"rule" : { "OR" : [ {"AND" : [{ "target" : "pile", "condition" : {"attribute" : "count", "relation" : "=", "value" : "0"}},
+				"grab" : { "target" : "grabTarget", "condition" : {"attribute" : "position", "relation" : "=", "value" : "top"}
+				},
+				"drop" : { "OR" : [ {"AND" : [{ "target" : "pile", "condition" : {"attribute" : "count", "relation" : "=", "value" : "0"}},
 												 { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "1" }} ]},
 										{"AND" : [{ "target" : "held", "condition" : {"attribute" : "suit", "relation" : "=", "value" : "same", "target2" : {"id" : "pile", "selector" : "top"}}},
-												  { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "+1", "target2" : {"id" : "pile", "selector" : "top"}}} ]} ]}
+												  { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "+1", "target2" : {"id" : "pile", "selector" : "top"}}} ]} ]
 				},
 				"triggers" : {"onDropOnto" : { "rule" : { "target" : {"idType" : "pileType", "id" : "winPile"}, "condition" : {"attribute" : "count", "relation" : "=", "value" : "13"}},
-								  "action" : { "command" : "win" }}}
+								  "action" : { "command" : "win" }}
 				}
 			}
 		}

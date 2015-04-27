@@ -1,0 +1,64 @@
+{
+	"name" : "Free Cell",
+	"layout" : {
+		"cards" : { "cardType" : "standard-deck", "count" : 1},
+		"tableGrid" : {"width" : 8, "height" : 8},
+		"piles" : [
+			{ "id" : "pile1", "pileType" : "playPile", "count" : 7, "position" : { "x" : 0, "y" : 1 }},
+			{ "id" : "pile2", "pileType" : "playPile", "count" : 7, "position" : { "x" : 1, "y" : 1 }},
+			{ "id" : "pile3", "pileType" : "playPile", "count" : 7, "position" : { "x" : 2, "y" : 1 }},
+			{ "id" : "pile4", "pileType" : "playPile", "count" : 7, "position" : { "x" : 3, "y" : 1 }},
+			{ "id" : "pile5", "pileType" : "playPile", "count" : 6, "position" : { "x" : 4, "y" : 1 }},
+			{ "id" : "pile6", "pileType" : "playPile", "count" : 6, "position" : { "x" : 5, "y" : 1 }},
+			{ "id" : "pile7", "pileType" : "playPile", "count" : 6, "position" : { "x" : 6, "y" : 1 }},
+			{ "id" : "pile7", "pileType" : "playPile", "count" : 6, "position" : { "x" : 7, "y" : 1 }},
+			{ "id" : "cell1", "pileType" : "cellPile", "count" : 0, "position" : { "x" : 0 , "y" : 0  }},
+			{ "id" : "cell2", "pileType" : "cellPile", "count" : 0, "position" : { "x" : 1 , "y" : 0  }},
+			{ "id" : "cell3", "pileType" : "cellPile", "count" : 0, "position" : { "x" : 2 , "y" : 0  }},
+			{ "id" : "cell4", "pileType" : "cellPile", "count" : 0, "position" : { "x" : 3 , "y" : 0  }},
+			{ "id" : "win1", "pileType" : "winPile", "position" : { "x" : 4, "y" : 0  }},
+			{ "id" : "win2", "pileType" : "winPile", "position" : { "x" : 5, "y" : 0  }},
+			{ "id" : "win3", "pileType" : "winPile", "position" : { "x" : 6, "y" : 0  }},
+			{ "id" : "win4", "pileType" : "winPile", "position" : { "x" : 7, "y" : 0  }}
+			
+		]
+	},
+
+	"rules" : {
+		"pileTypes" : {
+			"playPile" : {
+				"setup" : { "cards" : "random",
+							"facing" : "up" },
+				"grab" : { "AND" : [{"target" : "grabTarget", "condition" : {"attribute" : "color", "relation" : "=", "value" : "alt", "target" : {"id" : "grabTarget",
+																																					"selector" : {"id" : "above", "count" : "all"}}}},
+									{"target" : "grabTarget", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "run-1", "target" : {"id" : "grabTarget",
+																																					"selector" : {"id" : "above", "count" : "all"}}}}
+			    ]},
+				
+				"drop" : { "OR" : [{ "target" : "pile", "condition" : {"attribute" : "count", "relation" : "=", "value" : "0"}}, 
+									   { "AND" : [{ "target" : "held", "condition" : {"attribute" : "color", "relation" : "=", "value" : "alt", "target" : {"id" : "pile", "selector" : "top"}}},
+									   			   { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "-1", "target" : {"id" : "pile", "selector" : "top"}}} ]}
+									  ]
+				},
+				"triggers" : {"onDropFrom" : { "rule" : { "target" : { "id" : "pile", "selector" :"top" }, "condition" : { "attribute" : "facing", "relation" : "=", "value" : "down"}},
+									   "action" : { "command" : "face", "target" : { "id" : "pile", "selector" : "top"}, "arguments" : "up"}}
+							}
+			},
+			"cellPile" : {
+			},
+
+			"winPile" : {
+				"grab" : { "target" : "grabTarget", "condition" : {"attribute" : "position", "relation" : "=", "value" : "top"}
+				},
+				"drop" : { "OR" : [ {"AND" : [{ "target" : "pile", "condition" : {"attribute" : "count", "relation" : "=", "value" : "0"}},
+												 { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "1" }} ]},
+										{"AND" : [{ "target" : "held", "condition" : {"attribute" : "suit", "relation" : "=", "value" : "same", "target2" : {"id" : "pile", "selector" : "top"}}},
+												  { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "+1", "target2" : {"id" : "pile", "selector" : "top"}}} ]} ]
+				},
+				"triggers" : {"onDropOnto" : { "rule" : { "target" : {"idType" : "pileType", "id" : "winPile"}, "condition" : {"attribute" : "count", "relation" : "=", "value" : "13"}},
+								  "action" : { "command" : "win" }}
+				}
+			}
+		}
+	}
+}

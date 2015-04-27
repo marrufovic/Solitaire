@@ -70,10 +70,13 @@
 		for(var i = 0; i < this.game.layout.piles.length; i++)
 		{
 			var pile = this.game.layout.piles[i];
-			var stackSize = this.game.rules.pileTypes[pile.pileType].stackSize;
-			if(typeof stackSize === 'undefined')
-				stackSize = Number.POSITIVE_INFINITY;
-			var newPile = new SolitairePile(pile.id, pile.pileType, pile.position, stackSize);
+			var fanCount = this.game.rules.pileTypes[pile.pileType].fanCount;
+			if(typeof fanCount === 'undefined')
+				fanCount = Number.POSITIVE_INFINITY;
+			var fanDirection = this.game.rules.pileTypes[pile.pileType].fanDirection;
+			if(typeof fanDirection === 'undefined')
+				fanDirection = 'down';
+			var newPile = new SolitairePile(pile.id, pile.pileType, pile.position, fanCount, fanDirection);
 			var facingUp = true;
 			var setupRules = this.game.rules.pileTypes[pile.pileType].setup;
 			for(var j = 0; j < pile.count; j++)
@@ -270,62 +273,109 @@
 	SolitaireModel.prototype._evaluateCondition = function(condition, target, target2)
 	{
 		var lhs = this._getAttributeValue(condition.attribute, target);
-		var rhs = null;
+		var allRhs = [];
 		if(target2 === null)
-			rhs = condition.value;
-		else
-			rhs = this._getAttributeValue(condition.attribute, target2);
-
-		var objectComparison = false;
-		//transform the value of rhs based on parameters
-		if(condition.value === 'alt')
 		{
-			objectComparison = true;
-			if(target2 === null && typeof condition.target === 'undefined')
+			//if condition.value is an object comparison but target2 is null, we don't need to compare
+			if(condition.value === 'alt' || condition.value === 'same' || condition.value.slice(0,3) === 'run' || condition.value.slice(0,1) === '+' || condition.value.slice(0,1) === '-')
 				return true;
-			if(condition.attribute !== 'color')
-				throw new Error("RuleDefinition: condition value " + condition.value + 
-					" not allowed on attribute  " + condition.attribute);
 
-			if(rhs === 'red')
-				rhs = 'black';
-			else if(rhs === 'black')
-				rhs = 'red';
+			//otherwise, value is an absolute value
+			allRhs.push(condition.value);
 		}
-		else if(condition.value === 'same')
+		else
 		{
-			objectComparison = true;
+			//convert target2 to rhs values
+			if(!Array.isArray(target2))
+				target2 = [target2];
+			for(var i = 0; i < target2.length; i++)
+			{
+				allRhs.push(this._getAttributeValue(condition.attribute, target2[i]));
+			}
 		}
-		else if(condition.value.slice(0,1) === '+' || condition.value.slice(0,1) === '-')
+
+		for(var i = 0; i < allRhs.length; i++)
 		{
-			objectComparison = true;
-			var relativeValue = parseInt(condition.value);
-			rhs += relativeValue;
+			var rhs = allRhs[i];
+			var objectComparison = false;
+			//transform the value of rhs and lhs based on parameters
+			if(condition.value === 'alt')
+			{
+				objectComparison = true;
+				if(target2 === null && typeof condition.target === 'undefined')
+					continue;
+				if(condition.attribute !== 'color')
+					throw new Error("RuleDefinition: condition value " + condition.value + 
+						" not allowed on attribute  " + condition.attribute);
+
+				//set lhs to the last value
+				if(i > 0)
+					lhs = allRhs[i - 1];
+
+				//alternate rhs color
+				if(rhs === 'red')
+					rhs = 'black';
+				else if(rhs === 'black')
+					rhs = 'red';
+			}
+			else if(condition.value === 'same')
+			{
+				objectComparison = true;
+			}
+			//note: on relatives we SUBTRACT the value instead of multiply, because we are "fixing" the RHS value to make it equal, less then, etc
+			else if(condition.value.slice(0,3) === 'run')
+			{
+				objectComparison = true;
+				var relativeValue = parseInt(condition.value.slice(3));
+				rhs -= relativeValue * (i + 1);
+
+			}
+			else if(condition.value.slice(0,1) === '+' || condition.value.slice(0,1) === '-')
+			{
+				objectComparison = true;
+				var relativeValue = parseInt(condition.value);
+				rhs -= relativeValue;
+			}
+
+			//automatically succeed on object comparisons if either target is null
+			if(objectComparison && (lhs === null || rhs === null))
+				continue;
+
+			//if lhs is number and rhs is not a number, parse rhs as an integer
+			if(typeof lhs === 'number' && typeof rhs !== 'number')
+				rhs = parseInt(rhs);
+
+			if(!this._evaluateComparision(lhs, rhs, condition.relation))
+				return false;
 		}
+		return true;
+	};
 
-		//automatically succeed on object comparisons if either target is null
-		if(objectComparison && (lhs === null || rhs === null))
-			return true;
-
-		//if lhs is number and rhs is not a number, parse rhs as an integer
-		if(typeof lhs === 'number' && typeof rhs !== 'number')
-			rhs = parseInt(rhs);
-
-		if(condition.relation === '=')
+	SolitaireModel.prototype._evaluateComparision = function(lhs, rhs, relation)
+	{
+		if(relation === '=')
 		{
 			return lhs === rhs;
 		}
-		else if(condition.relation === '!=')
+		else if(relation === '!=')
 		{
 			return lhs !== rhs;
 		}
-		else if(condition.relation === '<')
+		else if(relation === '<')
 		{
 			return lhs < rhs;
 		}
-		else if(condition.relation === '>')
+		else if(relation === '>')
 		{
 			return lhs > rhs;
+		}
+		else if(relation === '<=')
+		{
+			return lhs <= rhs;
+		}
+		else if(relation === '>=')
+		{
+			return lhs >= rhs;
 		}
 		else
 		{
@@ -395,6 +445,14 @@
 				if(typeof targetSelector === 'string')
 				{
 					targetSelector = { id: targetSelector, count: 1};
+				}
+				if(typeof targetSelector.count === 'string')
+				{
+					if(targetSelector.count === 'all')
+						targetSelector.count = Number.POSITIVE_INFINITY;
+					else
+						throw new Error("RuleDefinition: unknown count " + targetSelector.count + " on target " + targetId);
+
 				}
 			}
 		}
@@ -473,10 +531,47 @@
 			for(var i = 0; i < targetSelector.count; i++)
 			{
 				var currentPosition = targetPosition + i;
-				if(currentPosition >= 0 && currentPosition < targetObj.pile.getCount())
-				{
-					selection.push(targetObj.pile.peekCard(currentPosition));
-				}
+				if(currentPosition < 0 || currentPosition >= targetObj.pile.getCount())
+					break;
+
+				selection.push(targetObj.pile.peekCard(currentPosition));
+
+			}
+			targetObj = selection;
+		}
+		else if(targetSelector.id === 'above')
+		{
+			if(!(targetObj instanceof SolitaireCard))
+				throw new Error("RuleDefinition: selector " + targetSelector.id + " not allowed on target " + targetId +
+									" of type " + targetObj.contructor);
+			var targetPosition = targetObj.pile.getCardPosition(targetObj) + 1;
+			var selection = [];
+			for(var i = 0; i < targetSelector.count; i++)
+			{
+				var currentPosition = targetPosition + i;
+				if(currentPosition < 0 || currentPosition >= targetObj.pile.getCount())
+					break;
+
+				selection.push(targetObj.pile.peekCard(currentPosition));
+
+			}
+			targetObj = selection;
+		}
+		else if(targetSelector.id === 'below')
+		{
+			if(!(targetObj instanceof SolitaireCard))
+				throw new Error("RuleDefinition: selector " + targetSelector.id + " not allowed on target " + targetId +
+									" of type " + targetObj.contructor);
+			var targetPosition = targetObj.pile.getCardPosition(targetObj) - 1;
+			var selection = [];
+			for(var i = 0; i < targetSelector.count; i++)
+			{
+				var currentPosition = targetPosition + i;
+				if(currentPosition < 0 || currentPosition >= targetObj.pile.getCount())
+					break;
+
+				selection.push(targetObj.pile.peekCard(currentPosition));
+
 			}
 			targetObj = selection;
 		}
@@ -536,12 +631,13 @@
 	//if pos is a number, selects via index, where 0 is the bottom and length-1 is the top
 	//note that insertion places the card at the index, moving all cards above that index
 	//this means that putCard('top') inserts at the index pile.length, but peekCard('top') selects the card at pile.length-1
-	var SolitairePile = function(pileId, pileType, position, stackSize)
+	var SolitairePile = function(pileId, pileType, position, fanCount, fanDirection)
 	{
 		this.pileId = pileId;
 		this.pileType = pileType;
 		this.position = position;
-		this.stackSize = stackSize;
+		this.fanCount = fanCount;
+		this.fanDirection = fanDirection;
 
 		this.pile = [];
 	};

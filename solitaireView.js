@@ -71,7 +71,7 @@
 	        SolitaireView.prototype.createCard = function(card_obj, texture)
 	        {
 		
-		    console.log(card_obj); 
+		    //console.log(card_obj); 
 
 		    var facing_up = card_obj.facingUp; 
 		    var pile_id = card_obj.pile.pileId;
@@ -188,7 +188,7 @@
 		    card.position.x = x;
 		    card.position.y = y;
 		    
-		    console.log(stage.width);
+		    //console.log(stage.width);
 		    // add it to the stage
 		    stage.addChild(card);
 		    
@@ -269,7 +269,7 @@
 		//this.card.rank
 		//this.card.facingUp;
 	        var texture = null;
-	        console.log(this.card.pile.pileId);
+	        //console.log(this.card.pile.pileId);
 	        if (this.card.facingUp)
 		    texture = solitaireView.textures[this.card.suit + this.card.rank]; 
 	        else 
