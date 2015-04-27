@@ -11,7 +11,7 @@
 			{ "id" : "pile5", "pileType" : "playPile", "count" : 6, "position" : { "x" : 4, "y" : 1 }},
 			{ "id" : "pile6", "pileType" : "playPile", "count" : 6, "position" : { "x" : 5, "y" : 1 }},
 			{ "id" : "pile7", "pileType" : "playPile", "count" : 6, "position" : { "x" : 6, "y" : 1 }},
-			{ "id" : "pile7", "pileType" : "playPile", "count" : 6, "position" : { "x" : 7, "y" : 1 }},
+			{ "id" : "pile8", "pileType" : "playPile", "count" : 6, "position" : { "x" : 7, "y" : 1 }},
 			{ "id" : "cell1", "pileType" : "cellPile", "count" : 0, "position" : { "x" : 0 , "y" : 0  }},
 			{ "id" : "cell2", "pileType" : "cellPile", "count" : 0, "position" : { "x" : 1 , "y" : 0  }},
 			{ "id" : "cell3", "pileType" : "cellPile", "count" : 0, "position" : { "x" : 2 , "y" : 0  }},
@@ -48,6 +48,7 @@
 			},
 
 			"winPile" : {
+				"fanCount" : 1,
 				"grab" : { "target" : "grabTarget", "condition" : {"attribute" : "position", "relation" : "=", "value" : "top"}
 				},
 				"drop" : { "OR" : [ {"AND" : [{ "target" : "pile", "condition" : {"attribute" : "count", "relation" : "=", "value" : "0"}},

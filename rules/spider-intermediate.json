@@ -1,0 +1,75 @@
+{
+	"name" : "Spider Intermediate",
+	"layout" : {
+		"cards" : { "cardType" : "standard-deck", "count" : 2},
+		"tableGrid" : {"width" : 10, "height" : 10},
+		"piles" : [
+			{ "id" : "pile1", "pileType" : "playPile", "count" : 6, "position" : { "x" : 0, "y" : 0 }},
+			{ "id" : "pile2", "pileType" : "playPile", "count" : 6, "position" : { "x" : 1, "y" : 0 }},
+			{ "id" : "pile3", "pileType" : "playPile", "count" : 6, "position" : { "x" : 2, "y" : 0 }},
+			{ "id" : "pile4", "pileType" : "playPile", "count" : 6, "position" : { "x" : 3, "y" : 0 }},
+			{ "id" : "pile5", "pileType" : "playPile", "count" : 5, "position" : { "x" : 4, "y" : 0 }},
+			{ "id" : "pile6", "pileType" : "playPile", "count" : 5, "position" : { "x" : 5, "y" : 0 }},
+			{ "id" : "pile7", "pileType" : "playPile", "count" : 5, "position" : { "x" : 6, "y" : 0 }},
+			{ "id" : "pile8", "pileType" : "playPile", "count" : 5, "position" : { "x" : 7, "y" : 0 }},
+			{ "id" : "pile9", "pileType" : "playPile", "count" : 5, "position" : { "x" : 8 , "y" : 0  }},
+			{ "id" : "pile10", "pileType" : "playPile", "count" : 5, "position" : { "x" : 9 , "y" : 0  }},
+			{ "id" : "stock1", "pileType" : "stockPile", "count" : 10, "position" : { "x" : 4, "y" : 9  }},
+			{ "id" : "stock2", "pileType" : "stockPile", "count" : 10, "position" : { "x" : 5, "y" : 9  }},
+			{ "id" : "stock3", "pileType" : "stockPile", "count" : 10, "position" : { "x" : 6, "y" : 9  }},
+			{ "id" : "stock4", "pileType" : "stockPile", "count" : 10, "position" : { "x" : 7, "y" : 9  }},
+			{ "id" : "stock4", "pileType" : "stockPile", "count" : 10, "position" : { "x" : 8, "y" : 9  }}
+		]
+	},
+
+	"rules" : {
+		"pileTypes" : {
+			"playPile" : {
+				"setup" : { "cards" : "random",
+							"facing" : "up" },
+				"grab" : { "AND" : [{ "target" : "grabTarget", "condition" : { "attribute" : "facing", "relation" : "=", "value" : "up" }},
+									{"target" : "grabTarget", "condition" : {"attribute" : "color", "relation" : "=", "value" : "same", "target" : {"id" : "grabTarget",
+																																					"selector" : {"id" : "above", "count" : "all"}}}},
+									{"target" : "grabTarget", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "run-1", "target" : {"id" : "grabTarget",
+																																					"selector" : {"id" : "above", "count" : "all"}}}}
+			    ]},
+				
+				"drop" : { "OR" : [{ "target" : "pile", "condition" : {"attribute" : "count", "relation" : "=", "value" : "0"}}, 
+								   { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "-1", "target" : {"id" : "pile", "selector" : "top"}}}
+								  ]
+				},
+				"triggers" : {"onDropFrom" : { "rule" : { "target" : { "id" : "pile", "selector" :"top" }, "condition" : { "attribute" : "facing", "relation" : "=", "value" : "down"}},
+									   "action" : { "command" : "face", "target" : { "id" : "pile", "selector" : "top"}, "arguments" : "up"}}
+							}
+			},
+			"stockPile" : {
+				"setup" : { "cards" : "random",
+							"facing" : "down" },
+				"activate" : {	"action" : [{ "command" : "move", "target" : {"id" : "pile", "selector" : "top"}, "arguments" : ["pile1", "top", "up"]},
+							  				{ "command" : "move", "target" : {"id" : "pile", "selector" : "top"}, "arguments" : ["pile2", "top", "up"]},
+							  				{ "command" : "move", "target" : {"id" : "pile", "selector" : "top"}, "arguments" : ["pile3", "top", "up"]},
+							  				{ "command" : "move", "target" : {"id" : "pile", "selector" : "top"}, "arguments" : ["pile4", "top", "up"]},
+							  				{ "command" : "move", "target" : {"id" : "pile", "selector" : "top"}, "arguments" : ["pile5", "top", "up"]},
+							  				{ "command" : "move", "target" : {"id" : "pile", "selector" : "top"}, "arguments" : ["pile6", "top", "up"]},
+							  				{ "command" : "move", "target" : {"id" : "pile", "selector" : "top"}, "arguments" : ["pile7", "top", "up"]},
+							  				{ "command" : "move", "target" : {"id" : "pile", "selector" : "top"}, "arguments" : ["pile8", "top", "up"]},
+							  				{ "command" : "move", "target" : {"id" : "pile", "selector" : "top"}, "arguments" : ["pile9", "top", "up"]},
+							  				{ "command" : "move", "target" : {"id" : "pile", "selector" : "top"}, "arguments" : ["pile10", "top", "up"]}]
+							  }
+			},
+
+			"winPile" : {
+				"grab" : { "target" : "grabTarget", "condition" : {"attribute" : "position", "relation" : "=", "value" : "top"}
+				},
+				"drop" : { "OR" : [ {"AND" : [{ "target" : "pile", "condition" : {"attribute" : "count", "relation" : "=", "value" : "0"}},
+												 { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "1" }} ]},
+										{"AND" : [{ "target" : "held", "condition" : {"attribute" : "suit", "relation" : "=", "value" : "same", "target2" : {"id" : "pile", "selector" : "top"}}},
+												  { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "+1", "target2" : {"id" : "pile", "selector" : "top"}}} ]} ]
+				},
+				"triggers" : {"onDropOnto" : { "rule" : { "target" : {"idType" : "pileType", "id" : "winPile"}, "condition" : {"attribute" : "count", "relation" : "=", "value" : "13"}},
+								  "action" : { "command" : "win" }}
+				}
+			}
+		}
+	}
+}

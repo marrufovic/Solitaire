@@ -1,8 +1,9 @@
 //solitaireGame.js
 
 var gameRules = new SolitaireGameRules()
-//gameRules.loadGame("rules/klondike3.json", 
-gameRules.loadGame("rules/freecell.json", 
+// gameRules.loadGame("rules/klondike3.json", 
+// gameRules.loadGame("rules/freecell.json", 
+gameRules.loadGame("rules/spider-intermediate.json", 
 	function() {
 	var model = new SolitaireModel(gameRules);
 	var view = new SolitaireView(model);
@@ -11,7 +12,14 @@ gameRules.loadGame("rules/freecell.json",
 	model.newGame(gameRules);
 
 
-	console.log(model.piles)
+	console.log(model.piles);
+	// var pile = model.piles['pile1'];
+	// console.log(pile.peekCard());
+	//spider tests
+	// model.activatePile(model.piles['stock1']);
+	// console.log(pile.peekCard());
+	// console.log(model.piles);
+	//klondike tests
 	//pretend view received a drag & drop
 	//view.onCardDropped("a", "b");
 	// var card = model.piles['pile2'].peekCard();

@@ -7,20 +7,20 @@
 		var currentIndex = array.length, temporaryValue, randomIndex ;
 
 		// While there remain elements to shuffle...
-		while (0 !== currentIndex) {
-
+		while (0 !== currentIndex)
+		{
 		// Pick a remaining element...
-		randomIndex = Math.floor(Math.random() * currentIndex);
-		currentIndex -= 1;
+			randomIndex = Math.floor(Math.random() * currentIndex);
+			currentIndex -= 1;
 
-		// And swap it with the current element.
-		temporaryValue = array[currentIndex];
-		array[currentIndex] = array[randomIndex];
-		array[randomIndex] = temporaryValue;
-  }
+			// And swap it with the current element.
+			temporaryValue = array[currentIndex];
+			array[currentIndex] = array[randomIndex];
+			array[randomIndex] = temporaryValue;
+	  }
 
-  return array;
-}
+	  return array;
+};
 
 	//classes
 	var SolitaireModel = function()
@@ -55,10 +55,9 @@
 		for(var i = 0; i < cards.length; i++)
 		{
 			var deckObj = cards[i];
-			var singleDeck = this._makeDeck(deckObj.cardType);
 			for(var j = 0; j < deckObj.count; j++)
 			{
-				deck = deck.concat(singleDeck);
+				deck = deck.concat(this._makeDeck(deckObj.cardType));
 			}
 		}
 
@@ -79,7 +78,10 @@
 			var newPile = new SolitairePile(pile.id, pile.pileType, pile.position, fanCount, fanDirection);
 			var facingUp = true;
 			var setupRules = this.game.rules.pileTypes[pile.pileType].setup;
-			for(var j = 0; j < pile.count; j++)
+			var pileCount = pile.count;
+			if(typeof pileCount === 'undefined')
+				pileCount = 0;
+			for(var j = 0; j < pileCount; j++)
 			{
 				var card = deck[deckIndex++];
 
@@ -89,14 +91,14 @@
 					card.facingUp = false;
 				else if(setupRules.facing === 'only-top-up')
 				{
-					if(j == pile.count - 1)
+					if(j === pileCount - 1)
 						card.facingUp = true;
 					else
 						card.facingUp = false;
 				}
 				else if(setupRules.facing === 'only-top-down')
 				{
-					if(j == pile.count - 1)
+					if(j === pileCount - 1)
 						card.facingUp = false;
 					else
 						card.facingUp = true;
@@ -106,12 +108,16 @@
 			this.piles[pile.id] = newPile;
 		}
 
+
+
 		if(deckIndex < deck.length)
 		{
-			console.log("RuleDef warning: some cards undealt.");
+			console.log("RuleDef warning: " + (deck.length - deckIndex) + " cards undealt.");
 		}
 
+		
 		this.onNewGameReady(this.piles, this.game.layout.tableGrid);
+		
 
 	};
 
@@ -171,7 +177,7 @@
 		if(typeof ruleActionPairs === 'undefined')
 			return;
 
-		if(typeof ruleActionPairs === 'string')
+		if(!Array.isArray(ruleActionPairs))
 			ruleActionPairs = [ruleActionPairs];
 		for(var i = 0; i < ruleActionPairs.length; i++)
 		{
@@ -185,48 +191,55 @@
 	}
 
 	//execute an action, such as flipping card facing and moving cards
-	SolitaireModel.prototype._evaluateAction = function(action, context)
+	//can be an action object or an array of actions
+	SolitaireModel.prototype._evaluateAction = function(actions, context)
 	{
-		var target = this._findTarget(action.target, context);
-		var args = action.arguments;
-		if(typeof args === 'string')
-			args = [args];
-		if(action.command === 'face')
+		if(!Array.isArray(actions))
+			actions = [actions];
+		for(var actionIndex = 0; actionIndex < actions.length; actionIndex++)
 		{
-			if(args[0] === 'up')
-				target.facingUp = true;
-			else if(args[0] === 'down')
-				target.facingUp = false;
-			else
-				throw new Error("RuleDefinition: invalid argument " + args[0] + " on command " + action.command);
+			var action = actions[actionIndex];
+			var target = this._findTarget(action.target, context);
 
-			this.onCardUpdated(target);
-		}
-		else if(action.command === 'move')
-		{
-			var target2 = this._findTarget(args[0], context);
-			if(!Array.isArray(target))
-				target = [target];
-			for(var i = 0; i < target.length; i++)
+			var args = action.arguments;
+			if(typeof args === 'string')
+				args = [args];
+			if(action.command === 'face')
 			{
-				this.moveCard(target[i], target2, args[1]);
-			}
-			if(args[2] === 'up')
-				target.facingUp = true;
-			else if(args[2] === 'down')
-				target.facingUp = false;
-			else
-				throw new Error("RuleDefinition: invalid argument " + args[1] + " on command " + action.command);
+				if(args[0] === 'up')
+					target.facingUp = true;
+				else if(args[0] === 'down')
+					target.facingUp = false;
+				else
+					throw new Error("RuleDefinition: invalid argument " + args[0] + " on command " + action.command);
 
-			this.onCardUpdated(target);
-		}
-		else if(action.command === 'win')
-		{
-			this.onGameWon();
-		}
-		else
-		{
-			throw new Error("RuleDefinition: unknown command " + action.command);
+				this.onCardUpdated(target);
+			}
+			else if(action.command === 'move')
+			{
+				var target2 = this._findTarget(args[0], context);
+				if(!Array.isArray(target))
+					target = [target];
+				for(var i = 0; i < target.length; i++)
+				{
+					this.moveCard(target[i], target2, args[1]);
+					if(args[2] === 'up')
+						target[i].facingUp = true;
+					else if(args[2] === 'down')
+						target[i].facingUp = false;
+					else
+						throw new Error("RuleDefinition: invalid argument " + args[1] + " on command " + action.command);
+					this.onCardUpdated(target[i]);
+				}
+			}
+			else if(action.command === 'win')
+			{
+				this.onGameWon();
+			}
+			else
+			{
+				throw new Error("RuleDefinition: unknown command " + action.command);
+			}
 		}
 	}
 
@@ -424,7 +437,7 @@
 		if(typeof target === 'string')
 		{
 			targetId = target;
-		}
+		} 
 		else
 		{
 			if(target.hasOwnProperty('id'))
@@ -610,7 +623,7 @@
 			//run drop from triggers
 			this._evaluateRuleActionPairs(triggers.onDropFrom, { dropTarget : dropTarget, held : card, pile : card.pile});
 			//run drop to triggers		
-			this._evaluateRuleActionPairs(triggers.onDropOnto, { dropTarget : dropTarget, held : card, pile : pile });
+			this._evaluateRuleActionPairs(this.game.rules.pileTypes[pile.pileType].onDropOnto, { dropTarget : dropTarget, held : card, pile : pile });
 		}
 
 		this.onCardMoved(card);
