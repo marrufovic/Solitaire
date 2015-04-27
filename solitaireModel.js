@@ -69,6 +69,8 @@
 		for(var i = 0; i < this.game.layout.piles.length; i++)
 		{
 			var pile = this.game.layout.piles[i];
+			if(typeof this.game.rules.pileTypes[pile.pileType].maxCount === 'undefined')
+				this.game.rules.pileTypes[pile.pileType].maxCount = Number.POSITIVE_INFINITY;
 			var fanCount = this.game.rules.pileTypes[pile.pileType].fanCount;
 			if(typeof fanCount === 'undefined')
 				fanCount = Number.POSITIVE_INFINITY;
@@ -168,7 +170,11 @@
 		if(typeof dropRules === 'undefined')
 			return true;
 		var dropTarget = pile.peekCard(pos);
-		return this._evaluateRule(dropRules, { held : card, pile : pile, dropTarget : dropTarget });
+
+		if(pile.getCount() >= this.game.rules.pileTypes[pile.pileType].maxCount)
+			return false;
+		else
+			return this._evaluateRule(dropRules, { held : card, pile : pile, dropTarget : dropTarget });
 	};
 
 	//For each rule-action pair, if the rule evaluates to true, then execute the action 

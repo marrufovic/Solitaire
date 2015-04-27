@@ -45,6 +45,7 @@
 							}
 			},
 			"cellPile" : {
+				"maxCount" : 1
 			},
 
 			"winPile" : {
