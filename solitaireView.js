@@ -15,7 +15,7 @@
 	        
 	      
 	        // Dictionary that will hold all of our cards
-	        this.textures = {};
+	        //this.textures = {};
 
 	        // fill the dictionary with the cards 
 	        for (var i = 0; i < 4; i++)
@@ -41,12 +41,22 @@
 		    // loop through all the cards in that suit and set the image 
 		    for(var j = 1; j < 14; j++)
 		    {
-			rank = j; 
-			this.textures[suit+rank] = PIXI.Texture.fromImage("images/" + suit + "/" + rank + ".png");
+			rank = j;
+
+ 			var texture = PIXI.Texture.fromImage("images/" + suit + "/" + rank + ".png");
+			var id = suit + rank; 
+			PIXI.Texture.addTextureToCache(texture, id);
+ 
+			//this.textures[suit+rank] = PIXI.Texture.fromImage("images/" + suit + "/" + rank + ".png");
 		    }   
                 }   
+	   
+
+	        var texture = PIXI.Texture.fromImage("images/backOfCard.png");
+	        var id = "facedown"; 
+	        PIXI.Texture.addTextureToCache(texture, id);
 	        
-	        this.textures["facedown"] = PIXI.Texture.fromImage("images/backOfCard.png");
+	        //this.textures["facedown"] = PIXI.Texture.fromImage("images/backOfCard.png");
 
 	        //initialize pixi, view variables, etc
 	        var stage = new PIXI.Stage(0xF2343F, true);
@@ -68,14 +78,23 @@
 
 	        // Pass in the image that is associated with the card
 	        //SolitaireView.prototype.createCard = function(x, y, texture, pile_id, facing_up)
-	        SolitaireView.prototype.createCard = function(card_obj, texture)
+	        SolitaireView.prototype.createCard = function(card_obj, texture_start, texture_alternate)
 	        {
 		
 		    //console.log(card_obj); 
 
 		    var facing_up = card_obj.facingUp; 
 		    var pile_id = card_obj.pile.pileId;
-		    var card = new PIXI.Sprite(texture);
+		    
+		    
+		    var start_text = PIXI.Texture.fromFrame(texture_start); 
+		   
+		    if (texture_alternate !== null)
+		       var alt_text = PIXI.Texture.fromFrame(texture_alternate); 
+		   
+		    var card = new PIXI.Sprite(start_text);
+
+
 		    var y = card_obj.pile.position.y; 
 		    var x = card_obj.pile.position.x; 
 		    
@@ -127,7 +146,7 @@
 		    card.anchor.x = 0.5;
 		    card.anchor.y = 0.5;
 		    // make it a bit bigger, so its easier to touch
-		    card.scale.x = card.scale.y = 1.0;
+		    card.scale.x = card.scale.y = 1.5 ;
 		    
 		    // use the mousedown and touchstart
 		    card.mousedown = card.touchstart = function(data)
@@ -138,6 +157,13 @@
 			// we want to track the movement of this particular touch
 			this.data = data;
 			this.alpha = 0.9;
+			
+			if (card_obj.pile.pileId === "stock1")
+			{
+			    card.position.x = 200;  
+			    card.setTexture(alt_text); 
+			}
+
 			if (model.canGrabCard(card_obj))
 			    this.dragging = true;
 			else 
@@ -268,16 +294,22 @@
 		this.card = card;
 		//this.card.rank
 		//this.card.facingUp;
-	        var texture = null;
+	        var start_texture = null;
+	        var alternate_texture = null;
+
 	        //console.log(this.card.pile.pileId);
 	        if (this.card.facingUp)
-		    texture = solitaireView.textures[this.card.suit + this.card.rank]; 
-	        else 
-		    texture = solitaireView.textures["facedown"]; 
-	       
+	        {
+		    start_texture = this.card.suit + this.card.rank; //= solitaireView.textures[this.card.suit + this.card.rank]; 
+	        }
+		else
+		{    
+		    start_texture = "facedown";//solitaireView.textures["facedown"]; 
+		    alternate_texture = this.card.suit + this.card.rank;  //solitaireView.textures[this.card.suit + this.card.rank]; 
+	        }
 	        // this.card.pile.getCardPosition(this.card) - returns index of what card position is of the card on the pile 
 	        // 0 is bottom card, top is length -1 
-	        solitaireView.createCard(this.card, texture); 
+	        solitaireView.createCard(this.card, start_texture, alternate_texture); 
                 // solitaireView.createCard(this.card.pile.position.x, this.card.pile.position.y, texture, this.card.pile.pileId, this.card.facingUp); 
 	};
 
