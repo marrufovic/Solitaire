@@ -92,7 +92,7 @@
 		    if (texture_alternate !== null)
 		       var alt_text = PIXI.Texture.fromFrame(texture_alternate); 
 		   
-		    card = new PIXI.Sprite(start_text);
+		    var card = new PIXI.Sprite(start_text);
 
 
 		    var y = card_obj.pile.position.y; 
@@ -160,7 +160,7 @@
 			
 			if (card_obj.pile.pileId === "stock1")
 			{
-			    card.position.x = (x+1)/8;  
+			    card.position.x += 100;  
 			    card.setTexture(alt_text); 
 			}
 
@@ -190,9 +190,9 @@
 		    {
 			this.alpha = 1
 			this.dragging = false;
-
-			card.position.x = x;
-			card.position.y = y;
+			
+			//card.position.x = x;
+			//card.position.y = y;
 			// set the interaction data to null
 			this.data = null;
 		    };
@@ -210,8 +210,16 @@
 			    this.position.y = newPosition.y - this.sy;
 			}
 		    }
-		 
+		    
+
+
+		    //------------------------------------------------------------
+		    // This is only being called on the last object being created...
+		    // need to fix this so the method is called on all card objects. 
 		    window.onresize = resize;
+		    //------------------------------------------------------------
+
+
 		    //resize();
 
 		    
@@ -230,16 +238,11 @@
 		    requestAnimFrame( animate ); 
 		    renderer.render(stage);
 		}
-	    
-
-
 		
 	        this.piles = {};
 	        
 		this.onCardMoved = null;
 		this.onCardActivated = null;
-	};
-
 
 
 
@@ -276,61 +279,69 @@
 	// put back to original size
 	//
 	
-	card.scale.x = 1;  // WARNING: must compute center based on original size, not previous scaled size
-	card.scale.y = 1;
+	stage.scale.x = 1;  // WARNING: must compute center based on original size, not previous scaled size
+	stage.scale.y = 1;
 	
-	var dw = (window.innerWidth-100)/card.width; //card_bounds
-	var dh = (window.innerHeight-100)/card.height; // card_bounds
+	var dw = (window.innerWidth-100)/stage.width; //stage_bounds
+	var dh = (window.innerHeight-100)/stage.height; // stage_bounds
 	var dm = Math.min(dw,dh);
 	
-	card.scale.x = dm;
-	card.scale.y = dm;
+	stage.scale.x = dm;
+	stage.scale.y = dm;
 	
 	//
-	// find current card bounds and resize/reposition card board
+	// find current stage bounds and resize/reposition stage board
 	//
-	//    var card_bounds = PIXI.DisplayObjectContainer.prototype.getBounds.call(card).clone();
-	card.position.x = (window.innerWidth/2) - (card.width/2) +100 ;
-	card.position.y = (window.innerHeight/2) - (card.height/2) -15;
+	//    var stage_bounds = PIXI.DisplayObjectContainer.prototype.getBounds.call(stage).clone();
+	stage.position.x = (window.innerWidth/2) - (stage.width/2) +100 ;
+	stage.position.y = (window.innerHeight/2) - (stage.height/2) -15;
 	
 	
 	
 	//    renderer.render(stage);     // render the stage (required to recompute the acutal size of the sprite)
-	//    card_bounds = PIXI.DisplayObjectContainer.prototype.getBounds.call(card).clone();
+	//    stage_bounds = PIXI.DisplayObjectContainer.prototype.getBounds.call(stage).clone();
 	
 	
-	//card.position.x = 0;
-	//card.position.y = 0;
+	//stage.position.x = 0;
+	//stage.position.y = 0;
 	
-	//    card.updateTransform();
+	//    stage.updateTransform();
 	
 	//    renderer.render(stage);     // render the stage (required to recompute the acutal size of the sprite)
-	//    card_bounds = PIXI.DisplayObjectContainer.prototype.getBounds.call(card).clone();
+	//    stage_bounds = PIXI.DisplayObjectContainer.prototype.getBounds.call(stage).clone();
 	
-	//    console.log("  CARD bounds x,y, w,h  " + card_bounds.x + ", " + card_bounds.y + ": "+ card_bounds.width   + ", " + card_bounds.height);
-	console.log("  CARD final  x,y, w,h  " + card.position.x + ", " + card.position.y + ": "+ card.width   + ", " + card.height);
+	//    console.log("  STAGE bounds x,y, w,h  " + stage_bounds.x + ", " + stage_bounds.y + ": "+ stage_bounds.width   + ", " + stage_bounds.height);
+//	console.log("  STAGE final  x,y, w,h  " + stage.position.x + ", " + stage.position.y + ": "+ stage.width   + ", " + stage.height);
 	
-	console.log("   scale: " + dw + ", " + dh);
+//	console.log("   scale: " + dw + ", " + dh);
 	
 	
-	//card_bounds = PIXI.DisplayObjectContainer.prototype.getBounds.call(card).clone();
-	//console.log("  CARD final bounds x,y, w,h  " + card_bounds.x + ", " + card_bounds.y + ": "+ card_bounds.width   + ", " + card_bounds.height);
+	//stage_bounds = PIXI.DisplayObjectContainer.prototype.getBounds.call(stage).clone();
+	//console.log("  STAGE final bounds x,y, w,h  " + stage_bounds.x + ", " + stage_bounds.y + ": "+ stage_bounds.width   + ", " + stage_bounds.height);
 	
-	//    boundingbox.position.x = card.position.x;
-	//    boundingbox.position.y = card.position.y;
+	//    boundingbox.position.x = stage.position.x;
+	//    boundingbox.position.y = stage.position.y;
 	
 	//    boundingbox.clear();
 	//    boundingbox.lineStyle(2,0xffffff);
 	//    boundingbox.beginFill(0xFFFF0B, .1);
-	//    boundingbox.drawRect(card_bounds.x, card_bounds.y, card_bounds.width, card_bounds.height);
+	//    boundingbox.drawRect(stage_bounds.x, stage_bounds.y, stage_bounds.width, stage_bounds.height);
 	//    boundingbox.endFill();
 	
 	
 	stage.updateTransform();
 	//renderer.clearBeforeRender = true;
-	//card.dirty = true;
+	//stage.dirty = true;
 
     };
+
+
+
+
+
+	};
+
+
 
 
 
