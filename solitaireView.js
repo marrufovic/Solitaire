@@ -59,8 +59,8 @@
 	        //this.textures["facedown"] = PIXI.Texture.fromImage("images/backOfCard.png");
 
 	        //initialize pixi, view variables, etc
-	        var stage = new PIXI.Stage(0xF2343F, true);
-	        var renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight, document.getElementById("game_board"));
+	        stage = new PIXI.Stage(0xF2343F, true);
+	        renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight, document.getElementById("game_board"));
 
 	        document.body.appendChild(renderer.view);
                 renderer.view.style.position = "absolute";
@@ -92,7 +92,7 @@
 		    if (texture_alternate !== null)
 		       var alt_text = PIXI.Texture.fromFrame(texture_alternate); 
 		   
-		    var card = new PIXI.Sprite(start_text);
+		    card = new PIXI.Sprite(start_text);
 
 
 		    var y = card_obj.pile.position.y; 
@@ -146,7 +146,7 @@
 		    card.anchor.x = 0.5;
 		    card.anchor.y = 0.5;
 		    // make it a bit bigger, so its easier to touch
-		    card.scale.x = card.scale.y = 1.5 ;
+		    card.scale.x = card.scale.y = (window.innerWidth + window.innerHeight)/2000;
 		    
 		    // use the mousedown and touchstart
 		    card.mousedown = card.touchstart = function(data)
@@ -160,7 +160,7 @@
 			
 			if (card_obj.pile.pileId === "stock1")
 			{
-			    card.position.x = 200;  
+			    card.position.x = (x+1)/8;  
 			    card.setTexture(alt_text); 
 			}
 
@@ -190,6 +190,9 @@
 		    {
 			this.alpha = 1
 			this.dragging = false;
+
+			card.position.x = x;
+			card.position.y = y;
 			// set the interaction data to null
 			this.data = null;
 		    };
@@ -208,8 +211,10 @@
 			}
 		    }
 		 
+		    window.onresize = resize;
+		    //resize();
 
-
+		    
 		    // move the sprite to its designated position
 		    card.position.x = x;
 		    card.position.y = y;
@@ -234,6 +239,101 @@
 		this.onCardMoved = null;
 		this.onCardActivated = null;
 	};
+
+
+
+
+        /**
+	 * resize the c4 sprite so that it takes up most of the screen
+	 *
+	 */
+    function resize (event)
+    {
+	
+	console.log("--------------------");
+	//console.log("  Window Size: " + window.innerWidth + ", " + window.innerHeight);
+	//console.log("  C4 current    x,y, w,h  " + c4.position.x + ", " + c4.position.y + ": "+ c4.width   + ", " + c4.height);
+	
+	//  boundingbox.clear();
+	//boundingbox.lineStyle(2,0xffffff);
+	//boundingbox.beginFill(0xFFFF0B, 0);
+	//boundingbox.drawRect(0,0,window.innerWidth, window.innerHeight);
+	//boundingbox.endFill();
+	
+	
+	//
+	// Resize Renderer Window
+	//
+	renderer.resize(window.innerWidth, window.innerHeight);
+
+	//
+	// find current c4 bounds and resize/reposition c4 board
+	//
+	//    var c4_bounds = PIXI.DisplayObjectContainer.prototype.getBounds.call(c4).clone();
+	
+	//
+	// need to compute new scale based on original size of C4 sprite, so 
+	// put back to original size
+	//
+	
+	card.scale.x = 1;  // WARNING: must compute center based on original size, not previous scaled size
+	card.scale.y = 1;
+	
+	var dw = (window.innerWidth-100)/card.width; //card_bounds
+	var dh = (window.innerHeight-100)/card.height; // card_bounds
+	var dm = Math.min(dw,dh);
+	
+	card.scale.x = dm;
+	card.scale.y = dm;
+	
+	//
+	// find current card bounds and resize/reposition card board
+	//
+	//    var card_bounds = PIXI.DisplayObjectContainer.prototype.getBounds.call(card).clone();
+	card.position.x = (window.innerWidth/2) - (card.width/2) +100 ;
+	card.position.y = (window.innerHeight/2) - (card.height/2) -15;
+	
+	
+	
+	//    renderer.render(stage);     // render the stage (required to recompute the acutal size of the sprite)
+	//    card_bounds = PIXI.DisplayObjectContainer.prototype.getBounds.call(card).clone();
+	
+	
+	//card.position.x = 0;
+	//card.position.y = 0;
+	
+	//    card.updateTransform();
+	
+	//    renderer.render(stage);     // render the stage (required to recompute the acutal size of the sprite)
+	//    card_bounds = PIXI.DisplayObjectContainer.prototype.getBounds.call(card).clone();
+	
+	//    console.log("  CARD bounds x,y, w,h  " + card_bounds.x + ", " + card_bounds.y + ": "+ card_bounds.width   + ", " + card_bounds.height);
+	console.log("  CARD final  x,y, w,h  " + card.position.x + ", " + card.position.y + ": "+ card.width   + ", " + card.height);
+	
+	console.log("   scale: " + dw + ", " + dh);
+	
+	
+	//card_bounds = PIXI.DisplayObjectContainer.prototype.getBounds.call(card).clone();
+	//console.log("  CARD final bounds x,y, w,h  " + card_bounds.x + ", " + card_bounds.y + ": "+ card_bounds.width   + ", " + card_bounds.height);
+	
+	//    boundingbox.position.x = card.position.x;
+	//    boundingbox.position.y = card.position.y;
+	
+	//    boundingbox.clear();
+	//    boundingbox.lineStyle(2,0xffffff);
+	//    boundingbox.beginFill(0xFFFF0B, .1);
+	//    boundingbox.drawRect(card_bounds.x, card_bounds.y, card_bounds.width, card_bounds.height);
+	//    boundingbox.endFill();
+	
+	
+	stage.updateTransform();
+	//renderer.clearBeforeRender = true;
+	//card.dirty = true;
+
+    };
+
+
+
 
 	SolitaireView.prototype.moveCard = function(card, pile)
 	{
@@ -346,96 +446,6 @@ function buildBoard(){
 }
 
 
-
-/**
- * resize the c4 sprite so that it takes up most of the screen
- *
- *
-function resize (event)
-{
-
-    console.log("--------------------");
-    console.log("  Window Size: " + window.innerWidth + ", " + window.innerHeight);
-    console.log("  C4 current    x,y, w,h  " + c4.position.x + ", " + c4.position.y + ": "+ c4.width   + ", " + c4.height);
-
-    boundingbox.clear();
-    boundingbox.lineStyle(2,0xffffff);
-    boundingbox.beginFill(0xFFFF0B, 0);
-    boundingbox.drawRect(0,0,window.innerWidth, window.innerHeight);
-    boundingbox.endFill();
-
-
-    //
-    // Resize Renderer Window
-    //
-    renderer.resize(window.innerWidth, window.innerHeight);
-
-    //
-    // find current c4 bounds and resize/reposition c4 board
-    //
-//    var c4_bounds = PIXI.DisplayObjectContainer.prototype.getBounds.call(c4).clone();
-
-    //
-    // need to compute new scale based on original size of C4 sprite, so 
-    // put back to original size
-    //
-
-    c4.scale.x = 1;  // WARNING: must compute center based on original size, not previous scaled size
-    c4.scale.y = 1;
-
-    var dw = (window.innerWidth-100)/c4.width; //c4_bounds
-    var dh = (window.innerHeight-100)/c4.height; // c4_bounds
-    var dm = Math.min(dw,dh);
-    
-    c4.scale.x = dm;
-    c4.scale.y = dm;
-
-    //
-    // find current c4 bounds and resize/reposition c4 board
-    //
-//    var c4_bounds = PIXI.DisplayObjectContainer.prototype.getBounds.call(c4).clone();
-    c4.position.x = (window.innerWidth/2) - (c4.width/2) +100 ;
-    c4.position.y = (window.innerHeight/2) - (c4.height/2) -15;
-
-
-
-//    renderer.render(stage);     // render the stage (required to recompute the acutal size of the sprite)
-//    c4_bounds = PIXI.DisplayObjectContainer.prototype.getBounds.call(c4).clone();
-    
-
-//c4.position.x = 0;
-//c4.position.y = 0;
-
-//    c4.updateTransform();
-
-//    renderer.render(stage);     // render the stage (required to recompute the acutal size of the sprite)
-//    c4_bounds = PIXI.DisplayObjectContainer.prototype.getBounds.call(c4).clone();
-
-//    console.log("  C4 bounds x,y, w,h  " + c4_bounds.x + ", " + c4_bounds.y + ": "+ c4_bounds.width   + ", " + c4_bounds.height);
-    console.log("  C4 final  x,y, w,h  " + c4.position.x + ", " + c4.position.y + ": "+ c4.width   + ", " + c4.height);
-
-    console.log("   scale: " + dw + ", " + dh);
-
-
-    c4_bounds = PIXI.DisplayObjectContainer.prototype.getBounds.call(c4).clone();
-    console.log("  C4 final bounds x,y, w,h  " + c4_bounds.x + ", " + c4_bounds.y + ": "+ c4_bounds.width   + ", " + c4_bounds.height);
-
-//    boundingbox.position.x = c4.position.x;
-//    boundingbox.position.y = c4.position.y;
-    
-//    boundingbox.clear();
-//    boundingbox.lineStyle(2,0xffffff);
-//    boundingbox.beginFill(0xFFFF0B, .1);
-//    boundingbox.drawRect(c4_bounds.x, c4_bounds.y, c4_bounds.width, c4_bounds.height);
-//    boundingbox.endFill();
-
-
-    stage.updateTransform();
-//renderer.clearBeforeRender = true;
-//c4.dirty = true;
-
-};
-*/
 
 
 
