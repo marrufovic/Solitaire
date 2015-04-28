@@ -186,14 +186,14 @@
 		if(!Array.isArray(ruleActionPairs))
 			ruleActionPairs = [ruleActionPairs];
 
-		var lastTrue = false;
+		var lastTrue = true;
 		for(var i = 0; i < ruleActionPairs.length; i++)
 		{
 			var rule = ruleActionPairs[i].rule;
 			var action = ruleActionPairs[i].action;
 			if(rule === 'else')
 			{
-				if(lastTrue)
+				if(!lastTrue)
 					this._evaluateAction(action, context);
 			}
 			else if(typeof rule === 'undefined' || this._evaluateRule(rule, context))
