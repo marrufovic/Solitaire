@@ -70,12 +70,33 @@
 	//	        renderer.view.style.height= "400px";
 	requestAnimFrame( animate );
 	
+
+	// still need to amek the rectangles resize
+	function rectangle( x, y, width, height, backgroundColor, borderColor, borderWidth ) { 
+	    var box = new PIXI.Graphics();
+	    box.beginFill(backgroundColor);
+	    box.lineStyle(borderWidth , borderColor);
+	    box.drawRect(0, 0, width - borderWidth, height - borderWidth);
+	    box.endFill();
+	    box.position.x = x  ;
+	    box.position.y = y  ;
+
+	    box.scale.x = box.scale.y = (window.innerWidth + window.innerHeight)/2000;
+	    return box;
+	};
+
+
+	// create a 100x100 white rectangle with a 10px black border at position 10/10
+	stage.addChild(rectangle(window.innerHeight *.7 , window.innerHeight * .03 , 90, 110 , 0xFFFFFF, 0x000000, 5));
+	stage.addChild(rectangle(window.innerHeight *.9 ,window.innerHeight * .03 , 90, 110 , 0xFFFFFF, 0x000000, 5));
+	stage.addChild(rectangle(window.innerHeight *1.1,window.innerHeight * .03  , 90, 110 , 0xFFFFFF, 0x000000, 5));
+	stage.addChild(rectangle(window.innerHeight *1.3,window.innerHeight * .03  , 90, 110 , 0xFFFFFF, 0x000000, 5));
+	
 	
 	var check = true;
 	var current_pile;
 	var y_offset = 1.0; 
 	var x_offset = 1.0; 
-
 	// Pass in the image that is associated with the card
 	//SolitaireView.prototype.createCard = function(x, y, texture, pile_id, facing_up)
 	SolitaireView.prototype.createCard = function(card_obj, texture_start, texture_alternate)
@@ -129,7 +150,7 @@
 	    }
 	    
 	    if(y === 0)
-		y = window.innerHeight * .1 
+		y = window.innerHeight * .1;
 	    else 
 		y = window.innerHeight * y_offset * .3;
 
@@ -191,7 +212,20 @@
 	    card.mouseup = card.mouseupoutside = card.touchend = card.touchendoutside = function(data)
 	    {
 		this.alpha = 1
-		this.dragging = false;
+		this.dragging = false; 
+		//var pileType = card.pile.pileType;
+		
+		// 
+		if (model.canDropCard(card_obj, card_obj.pile, 1))
+		{
+		    //alert('here');
+		}
+		else
+		{
+		    console.log(card_obj.pile);
+		    card.position.x = x;
+		    card.position.y = y;
+		}
 		
 		//	if(card.pile.pileId !== "stock1")
 		//	{
