@@ -290,9 +290,17 @@
 		}
 		else
 		{
+<<<<<<< Updated upstream
 		    //console.log(card_obj.pile);
 		    //card.position.x = x;
 		    //card.position.y = y;
+=======
+		    console.log(card_obj.pile);
+		    card.position.x = x;
+		    card.position.y = y;
+		    //returnsound=createSound("click.ogg", "click.mp3");
+		    returnsound.playclip();//-Dharani testing
+>>>>>>> Stashed changes
 		}
 		
 		//	if(card.pile.pileId !== "stock1")
