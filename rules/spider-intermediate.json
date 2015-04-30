@@ -33,6 +33,7 @@
 									{"target" : "grabTarget", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "run-1", "target" : {"id" : "grabTarget",
 																																					"selector" : {"id" : "above", "count" : "all"}}}}
 			    ]},
+			    "grabType" : "above",
 				
 				"drop" : { "OR" : [{ "target" : "pile", "condition" : {"attribute" : "count", "relation" : "=", "value" : "0"}}, 
 								   { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "-1", "target" : {"id" : "pile", "selector" : "top"}}}

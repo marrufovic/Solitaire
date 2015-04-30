@@ -77,7 +77,11 @@
 			var fanDirection = this.game.rules.pileTypes[pile.pileType].fanDirection;
 			if(typeof fanDirection === 'undefined')
 				fanDirection = 'down';
-			var newPile = new SolitairePile(pile.id, pile.pileType, pile.position, fanCount, fanDirection);
+			var grabType = this.game.rules.pileTypes[pile.pileType].grabType;
+			if(typeof grabType === 'undefined')
+				grabType = 'single';
+
+			var newPile = new SolitairePile(pile.id, pile.pileType, pile.position, fanCount, fanDirection, grabType);
 			var facingUp = true;
 			var setupRules = this.game.rules.pileTypes[pile.pileType].setup;
 			var pileCount = pile.count;
@@ -641,6 +645,8 @@
 	{
 		var triggers = this.game.rules.pileTypes[card.pile.pileType].triggers;
 		var dropTarget = pile.peekCard(pos);
+		var grabPile = card.pile;
+		var cardPosition = card.pile.getCardPosition(card);
 
 		card.pile.removeCard(card.pile.getCardPosition(card));
 		if(typeof triggers !== 'undefined')
@@ -659,6 +665,11 @@
 		}
 
 		this.onCardMoved(card);
+
+		if(pile.grabType === 'above' && grabPile.getCount() > cardPosition)
+		{
+			this.moveCard(grabPile.peekCard(cardPosition), pile, card.pile.getCardPosition(card) + 1);
+		}
 	};
 
 	SolitaireModel.prototype.activatePile = function(pile, card)
@@ -676,13 +687,14 @@
 	//if pos is a number, selects via index, where 0 is the bottom and length-1 is the top
 	//note that insertion places the card at the index, moving all cards above that index
 	//this means that putCard('top') inserts at the index pile.length, but peekCard('top') selects the card at pile.length-1
-	var SolitairePile = function(pileId, pileType, position, fanCount, fanDirection)
+	var SolitairePile = function(pileId, pileType, position, fanCount, fanDirection, grabType)
 	{
 		this.pileId = pileId;
 		this.pileType = pileType;
 		this.position = position;
 		this.fanCount = fanCount;
 		this.fanDirection = fanDirection;
+		this.grabType = grabType;
 
 		this.pile = [];
 	};

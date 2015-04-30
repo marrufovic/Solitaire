@@ -13,7 +13,8 @@ gameRules.loadGame("rules/klondike3.json",
 
 
 	console.log(model.piles);
-	// var pile = model.piles['pile1'];
+	// var pile = model.piles['pile4'];
+	// model.moveCard(pile.peekCard(1), model.piles['pile1'], 'top');
 	// console.log(pile.peekCard());
 	//spider tests
 	// model.activatePile(model.piles['stock1']);

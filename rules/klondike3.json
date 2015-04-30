@@ -31,6 +31,7 @@
 							"facing" : "only-top-up" },
 			    "grab" :  { "target" : "grabTarget", "condition" : { "attribute" : "facing", "relation" : "=", "value" : "up" }
 			    },
+			    "grabType" : "above",
 				
 				"drop" : { "OR" : [{ "AND" : [{ "target" : "pile", "condition" : {"attribute" : "count", "relation" : "=", "value" : "0"}},
 												  { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "13"}} ]}, 
