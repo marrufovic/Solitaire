@@ -664,7 +664,7 @@
 			this._evaluateRuleActionPairs(this.game.rules.pileTypes[pile.pileType].onDropOnto, { dropTarget : dropTarget, held : card, pile : pile });
 		}
 
-		this.onCardMoved(card);
+		this.onCardMoved(card, grabPile, pile);
 
 		if(pile.grabType === 'above' && grabPile.getCount() > cardPosition)
 		{

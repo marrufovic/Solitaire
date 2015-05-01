@@ -16,7 +16,7 @@
 		//alternatively we could use function.bind
 
 		this.view.onCardMoved = function(card, pile) { _this.model.moveCard(card, pile); };
-		this.view.onCardActivated = function(card) { _this.model.activateCard(card); };
+		this.view.onPileActivated = function(pile, card) { _this.model.activatePile(pile, card); };
 
 		this.model.onNewGameReady = function(piles, gridSize) { _this.view.onNewGame(piles, gridSize); }
 		this.model.onCardMoved = function(card, oldPile, newPile) { _this.view.onModelMovedCard(card, oldPile, newPile); };
