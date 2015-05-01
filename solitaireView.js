@@ -209,162 +209,82 @@
 	    	_this.onPileActivated(cardModel.pile, cardModel);
 	    };
 
+
+
 	    // use the mousedown and touchstart
-	 //    card.mousedown = card.touchstart = function(data)
-	 //    {
-		// //data.originalEvent.preventDefault()
-		// // store a refference to the data
-		// // The reason for this is because of multitouch
-		// // we want to track the movement of this particular touch
-		// this.data = data;
-		// this.alpha = 0.9;
-		
+	    card.mousedown = card.touchstart = function(data)
+	    {
+			//data.originalEvent.preventDefault()
+			// store a refference to the data
+			// The reason for this is because of multitouch
+			// we want to track the movement of this particular touch
+			this.data = data;
+			this.alpha = 0.9;
+			
+			if (model.canGrabCard(cardModel))
+			{
+			    this.dragging = true;
+			    _this.bringToFront(this)
+			}
+			else 
+			    this.dragging = false; 
+			this.sx = this.data.getLocalPosition(card).x * card.scale.x;
+			this.sy = this.data.getLocalPosition(card).y * card.scale.y;
+	    };
 
 
-		// if (cardModel.pile.pileId === "stock1")
-		// {
-		//     // The waste pile is inbetween 1/8 and 2/8 the screen width...may need to adjust if we choose to have 3 cards dealt
-		//     // from the stock pile
-		//     card.position.x = (3/16) * window.innerWidth;  
-		//     card.setTexture(alt_text); 
-		// }
+	    card.mouseover = function(data)
+	    {
+	    };
 
-		// if (model.canGrabCard(cardModel))
-		//     this.dragging = true;
-		// else 
-		//     this.dragging = false; 
-		// this.sx = this.data.getLocalPosition(card).x * card.scale.x;
-		// this.sy = this.data.getLocalPosition(card).y * card.scale.y;
-		// if (model.canGrabCard(cardModel))
-		// {
-		//     this.bringToFront();
-		// }
-	 //    };
-	    
+	    // set the events for when the mouse is released or a touch is released
+	    card.mouseup = card.mouseupoutside = card.touchend = card.touchendoutside = function(data)
+	    {
 
-	 //    PIXI.Sprite.prototype.bringToFront = function(){
-		// if(this.parent){
-		//     var parent = this.parent;
-		
-		//     parent.removeChild(this);
-		//     parent.addChild(this);
-		// }
-		// 	return card;
-	 //    };
-
-	 //    // set the events for when the mouse is released or a touch is released
-	 //    card.mouseup = card.mouseupoutside = card.touchend = card.touchendoutside = function(data)
-	 //    {
-
-		// // TODO: 
-		// // -account for the Y value of the card
-		// // -this potentially doesn't work with some versions of solitaire, would work for klondike (7 columns)
-		// // -the x value for a card isn't getting reset. It moves if it is within the bounds of the column, but if it is outside of it
-		// //  then it goes back to the position it was created in (its original x value, not the last x value it was at)
-		// // -need to account for the stockpile and if a card is dragged to the upper slots (I think we call them winpiles..)
-		// //  e.g. if we drag from the stockpile to the lower columns vs just clicking on the stockpile to deal new cards. 
-		
-
-		// // This breaks up the board into different columns and gives each column a width in which the card will snap to the center of the column (+- .5*card.width)
-		// var col;
-		// if(card.position.x > ((1/8)*window.innerWidth - (.5*card.width)) && card.position.x < ((1/8)*window.innerWidth + (.5*card.width)))
-		// {
-		//     col = 1; 
-		// }
-		// else if(card.position.x > ((2/8)*window.innerWidth - (.5*card.width)) && card.position.x < ((2/8)*window.innerWidth + (.5*card.width)))
-		// {
-		//     col = 2; 
-		// }
-		// else if(card.position.x > ((3/8)*window.innerWidth - (.5*card.width)) && card.position.x < ((3/8)*window.innerWidth + (.5*card.width)))
-		// {
-		//     col = 3; 			
-		// }
-		// else if(card.position.x > ((4/8)*window.innerWidth - (.5*card.width)) && card.position.x < ((4/8)*window.innerWidth + (.5*card.width)))
-		// {
-		//     col = 4; 
-		// }
-		// else if(card.position.x > ((5/8)*window.innerWidth - (.5*card.width)) && card.position.x < ((5/8)*window.innerWidth + (.5*card.width)))
-		// {
-		//     col = 5; 
-		// }
-		// else if(card.position.x > ((6/8)*window.innerWidth - (.5*card.width)) && card.position.x < ((6/8)*window.innerWidth + (.5*card.width)))
-		// {
-		//     col = 6; 
-		// }
-		// else if(card.position.x > ((7/8)*window.innerWidth - (.5*card.width)) && card.position.x < ((7/8)*window.innerWidth + (.5*card.width)))
-		// {
-		//     col = 7; 
-		// }
-		// else 
-		// {
-		//     col = -1;  
-		// }    
-
-		
-
-		// // Would be -1 if it was from stockpile or if when the card was released, it wasn't in any of the columns
-		// // We need to account for if the user drags from the stockpile onto one of the columns. As it is right now 
-		// // it just snaps it to the 
-		// if (col === -1)
-		// {
-		//     if (cardModel.pile.pileId === "stock1")
-		// 	card.position.x = (3/16) * window.innerWidth;
-		//     else 
-		// 	card.position.x = x;		
-		
-		// }
-		// else
-		// {
-		//     console.log(col);
-		//     card.position.x = (col/8)*window.innerWidth; 
-		//     card.position.y = y;
-		// }
+			this.alpha = 1
+			this.dragging = false; 
+			//var pileType = card.pile.pileType;
+			
+			// 
 
 
-		// this.alpha = 1
-		// this.dragging = false; 
-		// //var pileType = card.pile.pileType;
-		
-		// // 
-		// if (model.canDropCard(cardModel, cardModel.pile, 1))
-		// {
-		//     //alert('here');
-		// }
-		// else
-		// {
+			if (false)//model.canDropCard(cardModel, cardModel.pile, 1))
+			{
+			    //alert('here');
+			}
+			else
+			{
 
-		//     //console.log(cardModel.pile);
-		//     //card.position.x = x;
-		//     //card.position.y = y;
+			    //console.log(cardModel.pile);
+			    //card.position.x = x;
+			    //card.position.y = y;
 
-		//     console.log(cardModel.pile);
-		//     card.position.x = x;
-		//     card.position.y = y;
-		//     //returnsound=createSound("click.ogg", "click.mp3");
-		//     returnsound.playclip();//-Dharani testing
-		// }
-		
-		// //	if(card.pile.pileId !== "stock1")
-		// //	{
-		// //	    card.position.x = x;
-		// //	    card.position.y = y;
-		// //	}
-		// // set the interaction data to null
-		// this.data = null;
-	 //    };
+			    // console.log(cardModel.pile);
+			    var cardPixelPosition = _this._getCardPixelPosition(cardModel);
+			    card.position.x = cardPixelPosition.x;
+			    card.position.y = cardPixelPosition.y;
+
+			    //returnsound=createSound("click.ogg", "click.mp3");
+			    returnsound.playclip();//-Dharani testing
+			}
+
+			// set the interaction data to null
+			this.data = null;
+	    };
 	    
 	 //    // set the callbacks for when the mouse or a touch moves
-	 //    card.mousemove = card.touchmove = function(data)
-	 //    {
-		// if(this.dragging)
-		// {
-		//     // need to get parent coords..
-		//     var newPosition = this.data.getLocalPosition(this.parent);
-		//     // this.position.x = newPosition.x;
-		//     // this.position.y = newPosition.y;
-		//     this.position.x = newPosition.x - this.sx;
-		//     this.position.y = newPosition.y - this.sy;
-		// }
+	    card.mousemove = card.touchmove = function(data)
+	    {
+			if(this.dragging)
+			{
+			    // need to get parent coords..
+			    var newPosition = this.data.getLocalPosition(this.parent);
+			    // this.position.x = newPosition.x;
+			    // this.position.y = newPosition.y;
+			    this.position.x = newPosition.x - this.sx;
+			    this.position.y = newPosition.y - this.sy;
+			}
+		}
 	 //    }
 	    
 
