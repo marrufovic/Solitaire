@@ -19,6 +19,7 @@
 	
 	this.onCardMoved = null;
 	this.onPileActivated = null;
+	this.onNewGame = null;
 	
 	
 	// Dictionary that will hold all of our cards

@@ -15,6 +15,12 @@
 		//use closure beacause if we just set onCardMoved to _cardMoved, "this" would refer to the view
 		//alternatively we could use function.bind
 
+		this.view.onNewGame = function(gameType) {
+			var gameRules = new SolitaireGameRules();
+			gameRules.loadGame("rules/" + gameType + ".json", function() {
+				_this.model.newGame(gameType); 
+			}
+		};
 		this.view.onCardMoved = function(card, pile) { _this.model.moveCard(card, pile); };
 		this.view.onPileActivated = function(pile, card) { _this.model.activatePile(pile, card); };
 
