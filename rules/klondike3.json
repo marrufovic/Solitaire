@@ -61,12 +61,14 @@
 			},
 
 			"winPile" : {
+				"fanCount" : 1,
 				"grab" : { "target" : "grabTarget", "condition" : {"attribute" : "position", "relation" : "=", "value" : "top"}
 				},
 				"drop" : { "OR" : [ {"AND" : [{ "target" : "pile", "condition" : {"attribute" : "count", "relation" : "=", "value" : "0"}},
 												 { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "1" }} ]},
-										{"AND" : [{ "target" : "held", "condition" : {"attribute" : "suit", "relation" : "=", "value" : "same", "target2" : {"id" : "pile", "selector" : "top"}}},
-												  { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "+1", "target2" : {"id" : "pile", "selector" : "top"}}} ]} ]
+										{"AND" : [{ "target" : "pile", "condition" : {"attribute" : "count", "relation" : ">", "value" : "0"}},
+												  { "target" : "held", "condition" : {"attribute" : "suit", "relation" : "=", "value" : "same", "target" : {"id" : "pile", "selector" : "top"}}},
+												  { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "+1", "target" : {"id" : "pile", "selector" : "top"}}} ]} ]
 				},
 				"triggers" : {"onDropOnto" : { "rule" : { "target" : {"idType" : "pileType", "id" : "winPile"}, "condition" : {"attribute" : "count", "relation" : "=", "value" : "13"}},
 								  "action" : { "command" : "win" }}

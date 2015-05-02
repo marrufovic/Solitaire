@@ -2,7 +2,7 @@
 	"name" : "Free Cell",
 	"layout" : {
 		"cards" : { "cardType" : "standard-deck", "count" : 1},
-		"tableGrid" : {"width" : 8, "height" : 8},
+		"tableGrid" : {"width" : 8, "height" : 5},
 		"piles" : [
 			{ "id" : "pile1", "pileType" : "playPile", "count" : 7, "position" : { "x" : 0, "y" : 1 }},
 			{ "id" : "pile2", "pileType" : "playPile", "count" : 7, "position" : { "x" : 1, "y" : 1 }},
@@ -46,7 +46,9 @@
 							}
 			},
 			"cellPile" : {
-				"maxCount" : 1
+				"maxCount" : 1,
+				"grab" : "always",
+				"drop" : "always"
 			},
 
 			"winPile" : {
@@ -55,8 +57,9 @@
 				},
 				"drop" : { "OR" : [ {"AND" : [{ "target" : "pile", "condition" : {"attribute" : "count", "relation" : "=", "value" : "0"}},
 												 { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "1" }} ]},
-										{"AND" : [{ "target" : "held", "condition" : {"attribute" : "suit", "relation" : "=", "value" : "same", "target2" : {"id" : "pile", "selector" : "top"}}},
-												  { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "+1", "target2" : {"id" : "pile", "selector" : "top"}}} ]} ]
+										{"AND" : [{ "target" : "pile", "condition" : {"attribute" : "count", "relation" : ">", "value" : "0"}},
+												  { "target" : "held", "condition" : {"attribute" : "suit", "relation" : "=", "value" : "same", "target" : {"id" : "pile", "selector" : "top"}}},
+												  { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "+1", "target" : {"id" : "pile", "selector" : "top"}}} ]} ]
 				},
 				"triggers" : {"onDropOnto" : { "rule" : { "target" : {"idType" : "pileType", "id" : "winPile"}, "condition" : {"attribute" : "count", "relation" : "=", "value" : "13"}},
 								  "action" : { "command" : "win" }}

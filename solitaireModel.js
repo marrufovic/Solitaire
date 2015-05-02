@@ -164,7 +164,7 @@
 	{
 		var grabRules = this.game.rules.pileTypes[card.pile.pileType].grab;
 		if(typeof grabRules === 'undefined')
-			return true;
+			return false;
 		return this._evaluateRule(grabRules, { grabTarget : card });
 	};
 
@@ -172,7 +172,7 @@
 	{
 		var dropRules = this.game.rules.pileTypes[pile.pileType].drop;
 		if(typeof dropRules === 'undefined')
-			return true;
+			return false;
 		var dropTarget = pile.peekCard(pos);
 
 		if(pile.getCount() >= this.game.rules.pileTypes[pile.pileType].maxCount)
@@ -222,7 +222,9 @@
 		{
 			var action = actions[actionIndex];
 			var target = this._findTarget(action.target, context);
-
+			//target not found, don't do anything
+			if(target === null)
+				continue;
 			var args = action.arguments;
 			if(typeof args === 'string')
 				args = [args];
@@ -296,6 +298,9 @@
 		else
 		{
 			//base case, assume this is a rule
+			//if it's a string with the value 'always' just return true;
+			if(rule === 'always')
+				return true;
 			var targetObj = this._findTarget(rule.target, context);
 			var targetObj2 = null;
 			if(rule.condition.hasOwnProperty('target'))
@@ -307,6 +312,10 @@
 
 	SolitaireModel.prototype._evaluateCondition = function(condition, target, target2)
 	{
+		//if target is null then we're making some comparison but the card doesn't exist, so just succeed
+		if(target === null)
+			return true;
+
 		var lhs = this._getAttributeValue(condition.attribute, target);
 		var allRhs = [];
 		if(target2 === null)
@@ -359,7 +368,6 @@
 				{
 					objectComparison = true;
 				}
-				//note: on relatives we SUBTRACT the value instead of multiply, because we are "fixing" the RHS value to make it equal, less then, etc
 				else if(condition.value.slice(0,3) === 'run')
 				{
 					objectComparison = true;
@@ -371,7 +379,23 @@
 				{
 					objectComparison = true;
 					var relativeValue = parseInt(condition.value);
-					rhs -= relativeValue;
+					rhs += relativeValue;
+				}
+				else if(condition.value.slice(0,3) === 'top')
+				{
+					var indexOffset = 0;
+					if(condition.value.length > 3)
+						indexOffset = parseInt(condition.value.slice(3));
+
+					rhs = target.pile.getCount() - 1 - indexOffset;
+				}
+				else if(condition.value.slice(0,3) === 'bot')
+				{
+					var indexOffset = 0;
+					if(condition.value.length > 3)
+						indexOffset = parseInt(condition.value.slice(3));
+
+					rhs = indexOffset;
 				}
 			}
 
@@ -535,10 +559,25 @@
 			var startIndex = 0;
 			if(targetSelector.id.length > 3)
 				startIndex = parseInt(pos.slice(3));
+
+			var targetPosition = startIndex;
+			if(targetSelector.id.slice(0,3) === 'top')
+			{
+				targetPosition = targetObj.getCount() - startIndex - 1;
+			}
+
 			var selection = [];
 			for(var i  = 0; i < targetSelector.count; i++)
 			{
-				selection.push(targetObj.peekCard(targetSelector.id + (startIndex + i)));
+				var currentPosition = targetPosition;
+				if(targetSelector.id.slice(0,3) === 'top')
+					currentPosition -= i;
+				else
+					currentPosition += i;
+				if(currentPosition < 0 || currentPosition >= targetObj.getCount())
+					break;
+
+				selection.push(targetObj.peekCard(currentPosition));
 			}
 			targetObj = selection;
 			
@@ -652,14 +691,14 @@
 		if(typeof triggers !== 'undefined')
 		{
 			//run grab triggers
-			this._evaluateRuleActionPairs(triggers.onGrab, { grabTarget : card, pile : card.pile });
+			this._evaluateRuleActionPairs(triggers.onGrab, { grabTarget : card, pile : grabPile });
 		}
 
 		pile.putCard(card, pos);
 		if(typeof triggers !== 'undefined')
 		{
 			//run drop from triggers
-			this._evaluateRuleActionPairs(triggers.onDropFrom, { dropTarget : dropTarget, held : card, pile : card.pile});
+			this._evaluateRuleActionPairs(triggers.onDropFrom, { dropTarget : dropTarget, held : card, pile : grabPile });
 			//run drop to triggers		
 			this._evaluateRuleActionPairs(this.game.rules.pileTypes[pile.pileType].onDropOnto, { dropTarget : dropTarget, held : card, pile : pile });
 		}

@@ -15,11 +15,15 @@
 	this.gridSize = null;
 	this.cardPixelSize = null;
 
+	this.cardOffsetPercent = .2;
+
 	this.piles = {};
 	
 	this.onCardMoved = null;
 	this.onPileActivated = null;
-	this.onNewGame = null;
+	this.onNewGameStarted = null;
+
+	this.stage = null;
 	
 	
 	// Dictionary that will hold all of our cards
@@ -126,34 +130,40 @@
 	SolitaireView.prototype._getCardPixelPosition = function(cardModel)
 	{
 		var pilePosition = this._getPilePixelPosition(cardModel.pile);
-		var offsetPercent = .2;
-		var cardOffset = {x: 0, y:0};
-
-		var fanDirection = cardModel.pile.fanDirection;
-		if(fanDirection === 'down')
-		{
-			cardOffset.y = this.cardPixelSize.height * offsetPercent;
-		}
-		else if(fanDirection === 'up')
-		{
-			cardOffset.y = this.cardPixelSize.height * -offsetPercent;
-		}
-		else if(fanDirection === 'left')
-		{
-			cardOffset.x = this.cardPixelSize.width * -offsetPercent;
-		}
-		else if(fanDirection === 'right')
-		{
-			cardOffset.x = this.cardPixelSize.width * offsetPercent;
-		}
-
-		var cardPosition = Math.min(cardModel.pile.fanCount - 1, cardModel.pile.getCardPosition(cardModel));
-		cardOffset.x *= cardPosition;
-		cardOffset.y *= cardPosition;
+		
+		var cardPosition = cardModel.pile.getCardPosition(cardModel) % cardModel.pile.fanCount;
+		var cardOffset = this._calculateCardPixelOffset(cardModel.pile.fanDirection, cardPosition);
 
 		return {x: pilePosition.x + cardOffset.x, y: pilePosition.y + cardOffset.y};
 	};
 
+
+	SolitaireView.prototype._calculateCardPixelOffset = function(fanDirection, cardPosition)
+	{
+		var cardOffset = {x: 0, y: 0 };
+
+		if(fanDirection === 'down')
+		{
+			cardOffset.y = this.cardPixelSize.height * this.cardOffsetPercent;
+		}
+		else if(fanDirection === 'up')
+		{
+			cardOffset.y = this.cardPixelSize.height * -this.cardOffsetPercent;
+		}
+		else if(fanDirection === 'left')
+		{
+			cardOffset.x = this.cardPixelSize.width * -this.cardOffsetPercent;
+		}
+		else if(fanDirection === 'right')
+		{
+			cardOffset.x = this.cardPixelSize.width * this.cardOffsetPercent;
+		}
+
+		cardOffset.x *= cardPosition;
+		cardOffset.y *= cardPosition;
+
+		return cardOffset;
+	}
 
 	SolitaireView.prototype.createPileSprite = function(pileModel)
 	{
@@ -172,7 +182,7 @@
 
 	    var _this = this;
 
-	    pile.click = pile.tap = function(data)
+	    pile.click = pile.tap = function(interactionData)
 	    {
 	    	_this.onPileActivated(pileModel);
 	    };
@@ -180,6 +190,55 @@
 	    stage.addChild(pile);
 
 	    return pile;
+	};
+
+	SolitaireView.prototype._getPileViewAtGridPosition = function(gridPosition)
+	{
+		for(var pileId in this.piles)
+		{
+			if(this.piles.hasOwnProperty(pileId))
+			{
+				var pileView = this.piles[pileId];
+				if(pileView.pile.position.x === gridPosition.x && pileView.pile.position.y === gridPosition.y)
+					return pileView;
+			}
+		}
+		return null;
+	};
+
+	SolitaireView.prototype._getBoundingBoxOfPileView = function(pileView)
+	{
+	    var pilePixelPosition = this._getPilePixelPosition(pileView.pile);
+		var boundingBox = { x1: pilePixelPosition.x, y1: pilePixelPosition.y,
+							x2: pilePixelPosition.x + this.cardPixelSize.width, y2: pilePixelPosition.y + this.cardPixelSize.height };
+
+		var topCardPosition = Math.min(pileView.pile.fanCount - 1, pileView.pile.getCount() - 1);
+		var cardOffset = this._calculateCardPixelOffset(pileView.pile.fanDirection, topCardPosition);
+		if(cardOffset.x >= 0)
+		{
+			boundingBox.x2 += cardOffset.x;
+		}
+		else
+		{
+			boundingBox.x1 += cardOffset.x;
+		}
+
+		if(cardOffset.y >= 0)
+		{
+			boundingBox.y2 += cardOffset.y;
+		}
+		else
+		{
+			boundingBox.y1 += cardOffset.y;
+		}
+
+		return boundingBox;
+	};
+
+	SolitaireView.prototype._pointInBoundingBox = function(point, boundingBox)
+	{
+		return (point.x >= boundingBox.x1 && point.x <= boundingBox.x2 &&
+				point.y >= boundingBox.y1 && point.y <= boundingBox.y2);
 	};
 
 	// Pass in the image that is associated with the card
@@ -205,7 +264,7 @@
 	    
 	    var _this = this;
 
-	    card.click = card.tap = function(data)
+	    card.click = card.tap = function(interactionData)
 	    {
 	    	_this.onPileActivated(cardModel.pile, cardModel);
 	    };
@@ -213,13 +272,13 @@
 
 
 	    // use the mousedown and touchstart
-	    card.mousedown = card.touchstart = function(data)
+	    card.mousedown = card.touchstart = function(interactionData)
 	    {
-			//data.originalEvent.preventDefault()
-			// store a refference to the data
+			//interactionData.originalEvent.preventDefault()
+			// store a refference to the interactionData
 			// The reason for this is because of multitouch
 			// we want to track the movement of this particular touch
-			this.data = data;
+			this.interactionData = interactionData;
 			this.alpha = 0.9;
 			
 			if (model.canGrabCard(cardModel))
@@ -229,57 +288,83 @@
 			}
 			else 
 			    this.dragging = false; 
-			this.sx = this.data.getLocalPosition(card).x * card.scale.x;
-			this.sy = this.data.getLocalPosition(card).y * card.scale.y;
+			this.sx = this.interactionData.getLocalPosition(card).x * card.scale.x;
+			this.sy = this.interactionData.getLocalPosition(card).y * card.scale.y;
 	    };
 
 
-	    card.mouseover = function(data)
+	    card.mouseover = function(interactionData)
 	    {
 	    };
 
 	    // set the events for when the mouse is released or a touch is released
-	    card.mouseup = card.mouseupoutside = card.touchend = card.touchendoutside = function(data)
+	    card.mouseup = card.mouseupoutside = card.touchend = card.touchendoutside = function(interactionData)
 	    {
 
-			this.alpha = 1
+	    	if(this.dragging)
+	    	{
+				var mousePosition = stage.getMousePosition();
+				//iterate through all the piles on this column and row, checking if the bounding box intersects
+				var droppedPileView = null;
+				//column
+				var col = Math.floor(mousePosition.x / _this.cardPixelSize.width);
+				for(var row = 0; row < _this.gridSize.width; row++)
+				{
+					var pileView = _this._getPileViewAtGridPosition({x: col, y: row});
+					if(pileView !== null)
+					{
+						var pileBoundingBox = _this._getBoundingBoxOfPileView(pileView);
+						if(_this._pointInBoundingBox(mousePosition, pileBoundingBox))
+						{
+							droppedPileView = pileView;
+							break;
+						}
+					}
+				}
+				//row
+				var row = Math.floor(mousePosition.y / _this.cardPixelSize.height);
+				for(var col = 0; col < _this.gridSize.height; col++)
+				{
+					var pileView = _this._getPileViewAtGridPosition({x: col, y: row});
+					if(pileView !== null)
+					{
+						var pileBoundingBox = _this._getBoundingBoxOfPileView(pileView);
+						if(_this._pointInBoundingBox(mousePosition, pileBoundingBox))
+						{
+							droppedPileView = pileView;
+							break;
+						}
+					}
+				}
+				if (droppedPileView !== null && model.canDropCard(cardModel, droppedPileView.pile, 'top'))
+				{
+				    _this.onCardMoved(cardModel, droppedPileView.pile, 'top');
+				}
+				else
+				{
+				    //var cardPixelPosition = _this._getCardPixelPosition(cardModel);
+				    //card.position.x = cardPixelPosition.x;
+				    //card.position.y = cardPixelPosition.y;
+				    _this._updatePileCardViews(_this.piles[cardModel.pile.pileId]);
+
+				    //returnsound=createSound("click.ogg", "click.mp3");
+				    returnsound.playclip();//-Dharani testing
+				}
+			}
+
+			this.alpha = 1;
 			this.dragging = false; 
-			//var pileType = card.pile.pileType;
-			
-			// 
-
-
-			if (false)//model.canDropCard(cardModel, cardModel.pile, 1))
-			{
-			    //alert('here');
-			}
-			else
-			{
-
-			    //console.log(cardModel.pile);
-			    //card.position.x = x;
-			    //card.position.y = y;
-
-			    // console.log(cardModel.pile);
-			    var cardPixelPosition = _this._getCardPixelPosition(cardModel);
-			    card.position.x = cardPixelPosition.x;
-			    card.position.y = cardPixelPosition.y;
-
-			    //returnsound=createSound("click.ogg", "click.mp3");
-			    returnsound.playclip();//-Dharani testing
-			}
-
-			// set the interaction data to null
-			this.data = null;
+			// set the interaction interactionData to null
+			this.interactionData = null;
 	    };
 	    
 	 //    // set the callbacks for when the mouse or a touch moves
-	    card.mousemove = card.touchmove = function(data)
+	    card.mousemove = card.touchmove = function(interactionData)
 	    {
 			if(this.dragging)
 			{
 			    // need to get parent coords..
-			    var newPosition = this.data.getLocalPosition(this.parent);
+			    var newPosition = this.interactionData.getLocalPosition(this.parent);
 			    // this.position.x = newPosition.x;
 			    // this.position.y = newPosition.y;
 			    this.position.x = newPosition.x - this.sx;
@@ -408,13 +493,6 @@
 
     };
 
-
-    SolitaireView.prototype.moveCard = function(card, pile)
-    {
-	console.log("view: model moved card");
-    };
-
-
     //piles: associative array of pileId=>SolitairePile
     //gridSize: size of the display grid as object, e.g. {"width" : 8, "height" : 6}
     SolitaireView.prototype.onNewGame = function(piles, gridSize)
@@ -450,11 +528,23 @@
     	}
     };
 
+    SolitaireView.prototype._updatePileCardViews = function(pileView)
+    {
+    	//update positions
+		for(var i = 0; i < pileView.cards.length; i++)
+		{
+			var currentCardView = pileView.cards[i];
+			var cardPixelPosition = this._getCardPixelPosition(currentCardView.card);
+		    currentCardView.cardSprite.position.x = cardPixelPosition.x;
+		    currentCardView.cardSprite.position.y = cardPixelPosition.y;
+		    this.bringToFront(currentCardView.cardSprite);
+		}
+    }
+
     SolitaireView.prototype.onModelMovedCard = function(card, oldPile, newPile)
     {
     	var oldPileView = this.piles[oldPile.pileId];
     	var newPileView = this.piles[newPile.pileId];
-
 
     	//remove from old pile view
 		var cardViewIndex = oldPileView.indexOfCardView(card);
@@ -465,25 +555,8 @@
 		var newCardIndex = newPile.getCardPosition(card);
 		newPileView.cards.splice(newCardIndex, 0, cardView);
 
-		//update positions
-		for(var i = 0; i < oldPileView.cards.length; i++)
-		{
-			var currentCardView = oldPileView.cards[i];
-			var cardPixelPosition = this._getCardPixelPosition(currentCardView.card);
-		    currentCardView.cardSprite.position.x = cardPixelPosition.x;
-		    currentCardView.cardSprite.position.y = cardPixelPosition.y;
-		    this.bringToFront(currentCardView.cardSprite);
-		}
-
-		for(var i = 0; i < newPileView.cards.length; i++)
-		{
-			var currentCardView = newPileView.cards[i];
-			var cardPixelPosition = this._getCardPixelPosition(currentCardView.card);
-		    currentCardView.cardSprite.position.x = cardPixelPosition.x;
-		    currentCardView.cardSprite.position.y = cardPixelPosition.y;
-		    this.bringToFront(currentCardView.cardSprite);
-		}
-
+		this._updatePileCardViews(oldPileView);
+		this._updatePileCardViews(newPileView);
     };
 
     SolitaireView.prototype.onModelUpdatedCard = function(card)
