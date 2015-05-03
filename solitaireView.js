@@ -334,85 +334,61 @@
 
 	    	if(this.dragging)
 	    	{
-		    var mousePosition = stage.getMousePosition();
-		    //iterate through all the piles on this column and row, checking if the bounding box intersects
-		    var droppedPileView = null;
-		    //column
-		    var col = Math.floor(mousePosition.x / _this.cardPixelSize.width);
-		    for(var row = 0; row < _this.gridSize.width; row++)
-		    {
-			var pileView = _this._getPileViewAtGridPosition({x: col, y: row});
-			if(pileView !== null)
-			{
-			    var pileBoundingBox = _this._getBoundingBoxOfPileView(pileView);
-			    if(_this._pointInBoundingBox(mousePosition, pileBoundingBox))
+			    var mousePosition = stage.getMousePosition();
+			    //iterate through all the piles on this column and row, checking if the bounding box intersects
+			    var droppedPileView = null;
+			    //column
+			    var col = Math.floor(mousePosition.x / _this.cardPixelSize.width);
+			    for(var row = 0; row < _this.gridSize.width; row++)
 			    {
-				droppedPileView = pileView;
-				break;
+					var pileView = _this._getPileViewAtGridPosition({x: col, y: row});
+					if(pileView !== null)
+					{
+					    var pileBoundingBox = _this._getBoundingBoxOfPileView(pileView);
+					    if(_this._pointInBoundingBox(mousePosition, pileBoundingBox))
+					    {
+						droppedPileView = pileView;
+						break;
+					    }
+					}
 			    }
-			}
-		    }
-		    //row
-		    var row = Math.floor(mousePosition.y / _this.cardPixelSize.height);
-		    for(var col = 0; col < _this.gridSize.height; col++)
-		    {
-			var pileView = _this._getPileViewAtGridPosition({x: col, y: row});
-			if(pileView !== null)
-			{
-			    var pileBoundingBox = _this._getBoundingBoxOfPileView(pileView);
-			    if(_this._pointInBoundingBox(mousePosition, pileBoundingBox))
+			    //row
+			    var row = Math.floor(mousePosition.y / _this.cardPixelSize.height);
+			    for(var col = 0; col < _this.gridSize.height; col++)
 			    {
-				droppedPileView = pileView;
-				break;
+					var pileView = _this._getPileViewAtGridPosition({x: col, y: row});
+					if(pileView !== null)
+					{
+					    var pileBoundingBox = _this._getBoundingBoxOfPileView(pileView);
+					    if(_this._pointInBoundingBox(mousePosition, pileBoundingBox))
+					    {
+						droppedPileView = pileView;
+						break;
+					    }
+					}
 			    }
-			}
-		    }
-		    if (droppedPileView !== null && model.canDropCard(cardModel, droppedPileView.pile, 'top'))
-		    {
-			_this.onCardMoved(cardModel, droppedPileView.pile, 'top');
-			dropsound.playclip();
-
-			// Added by Dharani to check if the game is over
-			// I am not sure if there is already a flag to indicate a game is over, but I could not find it.
-			// this works ok, but feel free to change it if there are better ways.
-			var fullWinPileCount = 0;
-			var win = 0;
-					
-			for (var i = 1; i < 5; i ++)
-			{
-			    if(typeof model.piles['win'+i] === 'undefined')
+			    if (droppedPileView !== null && model.canDropCard(cardModel, droppedPileView.pile, 'top'))
 			    {
-				if(model.piles['win'].pile.length === 104)
-				{
-				    win = 1;
-				    break;
+					_this.onCardMoved(cardModel, droppedPileView.pile, 'top');
+					dropsound.playclip();
 				}
-			    }
-			    else if(model.piles['win'+i].pile.length === 13)
-				fullWinPileCount ++;
-    			}
-			if(fullWinPileCount === 4)
-			    win = 1;
-		    }
-		    else
-		    {
-			//var cardPixelPosition = _this._getCardPixelPosition(cardModel);
-			//card.position.x = cardPixelPosition.x;
-			//card.position.y = cardPixelPosition.y;
-			_this._updatePileCardViews(_this.piles[cardModel.pile.pileId]);
+			    else
+			    {
+					//var cardPixelPosition = _this._getCardPixelPosition(cardModel);
+					//card.position.x = cardPixelPosition.x;
+					//card.position.y = cardPixelPosition.y;
+					_this._updatePileCardViews(_this.piles[cardModel.pile.pileId]);
 
-			//returnsound=createSound("click.ogg", "click.mp3");
-			returnsound.playclip();//-Dharani testing
-		    }
-		}
+					//returnsound=createSound("click.ogg", "click.mp3");
+					returnsound.playclip();//-Dharani testing
+			    }
+			}
 
 		this.alpha = 1;
 		this.dragging = false; 
 		// set the interaction interactionData to null
 		this.interactionData = null;
-		if(win === 1)
-		    _this.onGameWon();
-	    };
+		};
 	    
 	    //    // set the callbacks for when the mouse or a touch moves
 	    card.mousemove = card.touchmove = function(interactionData)
@@ -426,7 +402,7 @@
 		    this.position.x = newPosition.x - this.sx;
 		    this.position.y = newPosition.y - this.sy;
 		}
-	    }
+	    };
 	    //    }
 	    
 
