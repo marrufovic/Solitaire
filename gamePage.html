@@ -1,0 +1,38 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Solitaire</title>
+  <meta name="description" content="HTML5 Solitaire">
+  <meta name="author" content="TeamRAT-UofU">
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+  <script src="pixi.dev.js"></script>
+  <script src="solitaireGameRules.js"></script>
+  <script src="solitaireModel.js"></script>
+  <script src="solitaireView.js"></script>
+  <script src="solitaireController.js"></script>
+  <script>
+  	var game = localStorage.getItem("game");
+  </script>
+  <script src="solitaireGame.js"></script>
+  <script src="soundfile.js"></script><!-- Handles sound effects -->
+  <script>
+	function goBack()
+	{
+		window.location = '/Projects/Solitaire/solitaire.html';
+	}
+  </script> 
+
+</head>
+
+<body>
+<div id="main">
+<div id="insideMenu">
+<button  id="inside" type="button" style="z-index:10; position:absolute;" onClick="goBack()">Go Back</button>
+</div>
+</div>
+</body>
+</html>
