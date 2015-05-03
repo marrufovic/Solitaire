@@ -343,13 +343,27 @@
 			_this.onCardMoved(cardModel, droppedPileView.pile, 'top');
 			dropsound.playclip();
 
-			// Added by Dharani to check if the game is completed
+			// Added by Dharani to check if the game is over
+			// I am not sure if there is already a flag to indicate a game is over, but I could not find it.
+			// this works ok, but feel free to change it if there are better ways.
 			var fullWinPileCount = 0;
+			var win = 0;
+					
 			for (var i = 1; i < 5; i ++)
 			{
-			    if(model.piles['win'+i].pile.length === 13)
+			    if(typeof model.piles['win'+i] === 'undefined')
+			    {
+				if(model.piles['win'].pile.length === 104)
+				{
+				    win = 1;
+				    break;
+				}
+			    }
+			    else if(model.piles['win'+i].pile.length === 13)
 				fullWinPileCount ++;
     			}
+			if(fullWinPileCount === 4)
+			    win = 1;
 		    }
 		    else
 		    {
@@ -367,7 +381,7 @@
 		this.dragging = false; 
 		// set the interaction interactionData to null
 		this.interactionData = null;
-		if(fullWinPileCount === 4)
+		if(win === 1)
 		    _this.onGameWon();
 	    };
 	    
