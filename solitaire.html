@@ -5,7 +5,7 @@
   <meta charset="utf-8">
 
   <title>Solitaire</title>
-  <meta name="description" content="HTML5 Solitaire">
+ <meta name="description" content="HTML5 Solitaire">
   <meta name="author" content="TeamRAT-UofU">
   <link rel="stylesheet" type="text/css" href="style.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
@@ -14,17 +14,53 @@
   <script src="solitaireModel.js"></script>
   <script src="solitaireView.js"></script>
   <script src="solitaireController.js"></script>
+  <script>
+    var game = localStorage.getItem("game");
+    
+    
+    //document.getElementById("inside").style.visibility = 'hidden';
+    
+    
+    function assignGame(option)
+    {
+    game=option;
+    localStorage.setItem("game", game);
+    location.reload();
+    }
+    
+    function goBack()
+    {
+    location.reload();
+    }
+    //document.getElementById(main).innerHTML = "hello";
+  </script>
   <script src="solitaireGame.js"></script>
   <script src="soundfile.js"></script><!-- Handles sound effects -->
- 
+  <script>
+    game="";
+    localStorage.setItem("game", game);
+  </script> 
 
 </head>
 
 <body>
 
-<canvas id="game_board" minwidth="500" minheight="500"></canvas>
-
-
+<div id="main">
+<div id="insideMenu">
+<button  id="inside" type="button" style="z-index:10; position:absolute;" onClick="goBack()">Go Back</button>
+</div>
+<div id="logo"><h1>Team RAT's Solitaire</h1></div>
+<div id="menu">
+  <h2>Choose your type:</h2>
+  <button id="klondike" name="klondike" onClick="assignGame('rules/klondike3.json')">Klondike 3</button>
+  <br>
+  <button id="freecell" name="freecell" onClick="assignGame('rules/freecell.json')">Free Cell</button>
+  <br>
+  <button id="spider" name="spider" onClick="assignGame('rules/spider-intermediate.json')">Spider</button>
+  <br>
+</div>
+<div id="footer">Created by: Elliot Hatch, James Lundgren, Victor Marrufo, and Dharani Adhikari</div>
+</div>
 
 
 </body>
