@@ -25,11 +25,39 @@
 
 	this.stage = null;
 	
+
+	// used for when onNewGame is called and sprite sheet hasn't loaded, store 
+	// variables passed in from model
+	this.copyPiles = null;
+	this.loaded = false; 
+
+	// Loads the spritesheet
+	var assetsToLoader = ["images/cards.json"];
+	loader = new PIXI.AssetLoader(assetsToLoader);
+
+	// Set the callback for when the sprites are loaded
+	loader.onComplete = onAssetsLoaded;
+	loader.load();
+	
+	// 'this' loses scope to the PIXI object inside the callback
+	// need a variable so we can call the functions and member variables
+	var testing = this; 
+
+	// Callback method for when sprite sheet is loaded, can start the game
+	function onAssetsLoaded()
+	{
+	    // prevents onNewGame from returning early
+	    testing.loaded = true; 
+	    testing.onNewGame(testing.copyPiles, testing.gridSize);
+	}
+
+	
 	
 	// Dictionary that will hold all of our cards
 	//this.textures = {};
 
-	// fill the dictionary with the cards 
+	// fill the dictionary with the cards
+	/*
 	for (var i = 0; i < 4; i++)
 	{
 	    
@@ -69,10 +97,10 @@
 	PIXI.Texture.addTextureToCache(texture, id);
 	var pileTexture = PIXI.Texture.fromImage("images/redJoker.png");
 	PIXI.Texture.addTextureToCache(pileTexture, 'pile');
-
+*/
 	
 	//this.textures["facedown"] = PIXI.Texture.fromImage("images/backOfCard.png");
-
+	
 	//initialize pixi, view variables, etc
 	stage = new PIXI.Stage(0xF2343F, true);
 	renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight, document.getElementById("game_board"));
@@ -117,9 +145,10 @@
 
 	SolitaireView.prototype._getCardTexture = function(cardModel)
 	{
-	    var textureName = 'facedown';
+	    //var textureName = 'facedown';
+	    var textureName = 'backOfCard.png';
 	    if(cardModel.facingUp)
-		textureName = cardModel.suit + cardModel.rank;
+		textureName = cardModel.suit + "/" + cardModel.rank + ".png";//cardModel.suit + cardModel.rank;
 	    return PIXI.Texture.fromFrame(textureName);
 	};
 
@@ -169,7 +198,7 @@
 
 	SolitaireView.prototype.createPileSprite = function(pileModel)
 	{
-	    var texture = PIXI.Texture.fromFrame('pile');
+	    var texture = PIXI.Texture.fromFrame('redJoker.png');//'pile');
 	    var pile = new PIXI.Sprite(texture);
 
 	    pile.width = this.cardPixelSize.width;
@@ -525,6 +554,15 @@
     SolitaireView.prototype.onNewGame = function(piles, gridSize)
     {
     	this.gridSize = gridSize;
+
+	// If the sprite sheet hasn't loaded, store variables and return, method will 
+	// be called from within SolitaireView constructor once spritesheet is loaded
+	if (!this.loaded)
+	{
+	    this.copyPiles = piles;
+	    return;
+	}
+
 	// var texture = PIXI.Texture.fromFrame('facedown');
 	// var textureAspectRatio = texture.width / texture.height;
 	var textureAspectRatio = 96.0 / 72.0;
