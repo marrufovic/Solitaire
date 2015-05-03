@@ -1,7 +1,7 @@
 /*
  *
  * Authors: Dharani Adhikari, James Lungren, Elliot Hatch, Victor Murrafo
- * Source: http://www.javascriptkit.com/script/script2/soundlink.shtml#current
+ * Reference Source: http://www.javascriptkit.com/script/script2/soundlink.shtml#current
  */
 
 
@@ -37,6 +37,6 @@ function createSound(sound){
 
 //Initialize two sound clips one for returned card and one for accepted card
 
-var dropsound=createSound("audio/accept.ogg", "audio/accept.mp3");
+var dropsound=createSound("audio/dropped.wav", "audio/dropped.mp3");
 var returnsound=createSound("audio/return.ogg", "audio/return.mp3");
 var winsound=createSound("audio/win.wav", "audio/win.mp3");
