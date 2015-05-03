@@ -35,8 +35,9 @@
 				
 				"drop" : { "OR" : [{ "AND" : [{ "target" : "pile", "condition" : {"attribute" : "count", "relation" : "=", "value" : "0"}},
 												  { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "13"}} ]}, 
-									   { "AND" : [{ "target" : "held", "condition" : {"attribute" : "color", "relation" : "=", "value" : "alt", "target" : {"id" : "pile", "selector" : "top"}}},
-									   			   { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "-1", "target" : {"id" : "pile", "selector" : "top"}}} ]}
+									   { "AND" : [{ "target" : "pile", "condition" : {"attribute" : "count", "relation" : ">", "value" : "0"}},
+									   			  { "target" : "held", "condition" : {"attribute" : "color", "relation" : "=", "value" : "alt", "target" : {"id" : "pile", "selector" : "top"}}},
+									   			  { "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "-1", "target" : {"id" : "pile", "selector" : "top"}}} ]}
 									  ]
 				},
 				"triggers" : {"onDropFrom" : { "rule" : { "target" : { "id" : "pile", "selector" :"top" }, "condition" : { "attribute" : "facing", "relation" : "=", "value" : "down"}},

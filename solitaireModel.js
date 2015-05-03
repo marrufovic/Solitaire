@@ -221,6 +221,11 @@
 		for(var actionIndex = 0; actionIndex < actions.length; actionIndex++)
 		{
 			var action = actions[actionIndex];
+			if(action.command === 'win')
+			{
+				this.onGameWon();
+				continue;
+			}
 			var target = this._findTarget(action.target, context);
 			//target not found, don't do anything
 			if(target === null)
@@ -255,10 +260,6 @@
 						throw new Error("RuleDefinition: invalid argument " + args[1] + " on command " + action.command);
 					this.onCardUpdated(target[i]);
 				}
-			}
-			else if(action.command === 'win')
-			{
-				this.onGameWon();
 			}
 			else
 			{
@@ -316,7 +317,16 @@
 		if(target === null)
 			return true;
 
-		var lhs = this._getAttributeValue(condition.attribute, target);
+		var allLhs = [];
+
+		if(!Array.isArray(target))
+			target = [target];
+
+		for(var i = 0; i < target.length; i++)
+		{
+			allLhs.push(this._getAttributeValue(condition.attribute, target[i]));
+		}
+
 		var allRhs = [];
 		if(target2 === null)
 		{
@@ -338,77 +348,81 @@
 			}
 		}
 
-		for(var i = 0; i < allRhs.length; i++)
+		for(var i = 0; i < allLhs.length; i++)
 		{
-			var rhs = allRhs[i];
-			var objectComparison = false;
-			//transform the value of rhs and lhs based on parameters
-			if(typeof condition.value === 'string')
+			var lhs = allLhs[i];
+			for(var j = 0; j < allRhs.length; j++)
 			{
-				if(condition.value === 'alt')
+				var rhs = allRhs[j];
+				var objectComparison = false;
+				//transform the value of rhs and lhs based on parameters
+				if(typeof condition.value === 'string')
 				{
-					objectComparison = true;
-					if(target2 === null && typeof condition.target === 'undefined')
-						continue;
-					if(condition.attribute !== 'color')
-						throw new Error("RuleDefinition: condition value " + condition.value + 
-							" not allowed on attribute  " + condition.attribute);
+					if(condition.value === 'alt')
+					{
+						objectComparison = true;
+						if(target2 === null && typeof condition.target === 'undefined')
+							continue;
+						if(condition.attribute !== 'color')
+							throw new Error("RuleDefinition: condition value " + condition.value + 
+								" not allowed on attribute  " + condition.attribute);
 
-					//set lhs to the last value
-					if(i > 0)
-						lhs = allRhs[i - 1];
+						//set lhs to the last value
+						if(i > 0)
+							lhs = allRhs[i - 1];
 
-					//alternate rhs color
-					if(rhs === 'red')
-						rhs = 'black';
-					else if(rhs === 'black')
-						rhs = 'red';
-				}
-				else if(condition.value === 'same')
-				{
-					objectComparison = true;
-				}
-				else if(condition.value.slice(0,3) === 'run')
-				{
-					objectComparison = true;
-					var relativeValue = parseInt(condition.value.slice(3));
-					rhs -= relativeValue * (i + 1);
+						//alternate rhs color
+						if(rhs === 'red')
+							rhs = 'black';
+						else if(rhs === 'black')
+							rhs = 'red';
+					}
+					else if(condition.value === 'same')
+					{
+						objectComparison = true;
+					}
+					else if(condition.value.slice(0,3) === 'run')
+					{
+						objectComparison = true;
+						var relativeValue = parseInt(condition.value.slice(3));
+						rhs -= relativeValue * (i + 1);
 
-				}
-				else if(condition.value.slice(0,1) === '+' || condition.value.slice(0,1) === '-')
-				{
-					objectComparison = true;
-					var relativeValue = parseInt(condition.value);
-					rhs += relativeValue;
-				}
-				else if(condition.value.slice(0,3) === 'top')
-				{
-					var indexOffset = 0;
-					if(condition.value.length > 3)
-						indexOffset = parseInt(condition.value.slice(3));
+					}
+					else if(condition.value.slice(0,1) === '+' || condition.value.slice(0,1) === '-')
+					{
+						objectComparison = true;
+						var relativeValue = parseInt(condition.value);
+						rhs += relativeValue;
+					}
+					else if(condition.value.slice(0,3) === 'top')
+					{
+						var indexOffset = 0;
+						if(condition.value.length > 3)
+							indexOffset = parseInt(condition.value.slice(3));
 
-					rhs = target.pile.getCount() - 1 - indexOffset;
-				}
-				else if(condition.value.slice(0,3) === 'bot')
-				{
-					var indexOffset = 0;
-					if(condition.value.length > 3)
-						indexOffset = parseInt(condition.value.slice(3));
+						rhs = target[i].pile.getCount() - 1 - indexOffset;
+					}
+					else if(condition.value.slice(0,3) === 'bot')
+					{
+						var indexOffset = 0;
+						if(condition.value.length > 3)
+							indexOffset = parseInt(condition.value.slice(3));
 
-					rhs = indexOffset;
+						rhs = indexOffset;
+					}
 				}
+
+				//automatically succeed on object comparisons if either target is null
+				if(objectComparison && (lhs === null || rhs === null))
+					continue;
+
+				//if lhs is number and rhs is not a number, parse rhs as an integer
+				if(typeof lhs === 'number' && typeof rhs !== 'number')
+					rhs = parseInt(rhs);
+
+				if(!this._evaluateComparision(lhs, rhs, condition.relation))
+					return false;
 			}
-
-			//automatically succeed on object comparisons if either target is null
-			if(objectComparison && (lhs === null || rhs === null))
-				continue;
-
-			//if lhs is number and rhs is not a number, parse rhs as an integer
-			if(typeof lhs === 'number' && typeof rhs !== 'number')
-				rhs = parseInt(rhs);
-
-			if(!this._evaluateComparision(lhs, rhs, condition.relation))
-				return false;
 		}
 		return true;
 	};
@@ -531,6 +545,9 @@
 			if(context.hasOwnProperty(targetId))
 			{
 				targetObj = context[targetId];
+				//the context might have 'undefined' so check for that, change to null
+				if(typeof targetObj === 'undefined')
+					targetObj = null;
 			}
 			//not found in context, try finding a pile with the id
 			else if(this.piles.hasOwnProperty(targetId))
@@ -548,159 +565,165 @@
 			//invalid idType
 			throw new Error("RuleDefinition: unknown target idType " + targetIdType + " on target " + targetId);
 		}
-
-		//use selector to refine selection
-		if(targetSelector.id.slice(0,3) === 'top' || targetSelector.id.slice(0,3) === 'bot')
+		if(targetObj !== null)
 		{
-			if(!(targetObj instanceof SolitairePile))
-				throw new Error("RuleDefinition: selector " + targetSelector + "not allowed on target " + targetId +
-									" of type " + typeof targetObj);
-			
-			var startIndex = 0;
-			if(targetSelector.id.length > 3)
-				startIndex = parseInt(pos.slice(3));
-
-			var targetPosition = startIndex;
-			if(targetSelector.id.slice(0,3) === 'top')
+			//use selector to refine selection
+			if(targetSelector.id.slice(0,3) === 'top' || targetSelector.id.slice(0,3) === 'bot')
 			{
-				targetPosition = targetObj.getCount() - startIndex - 1;
-			}
+				if(!(targetObj instanceof SolitairePile))
+					throw new Error("RuleDefinition: selector " + targetSelector + "not allowed on target " + targetId +
+										" of type " + typeof targetObj);
+				
+				var startIndex = 0;
+				if(targetSelector.id.length > 3)
+					startIndex = parseInt(pos.slice(3));
 
-			var selection = [];
-			for(var i  = 0; i < targetSelector.count; i++)
-			{
-				var currentPosition = targetPosition;
+				var targetPosition = startIndex;
 				if(targetSelector.id.slice(0,3) === 'top')
-					currentPosition -= i;
-				else
-					currentPosition += i;
-				if(currentPosition < 0 || currentPosition >= targetObj.getCount())
-					break;
+				{
+					targetPosition = targetObj.getCount() - startIndex - 1;
+				}
 
-				selection.push(targetObj.peekCard(currentPosition));
+				var selection = [];
+				for(var i  = 0; i < targetSelector.count; i++)
+				{
+					var currentPosition = targetPosition;
+					if(targetSelector.id.slice(0,3) === 'top')
+						currentPosition -= i;
+					else
+						currentPosition += i;
+					if(currentPosition < 0 || currentPosition >= targetObj.getCount())
+						break;
+
+					selection.push(targetObj.peekCard(currentPosition));
+				}
+				targetObj = selection;
+				
 			}
-			targetObj = selection;
-			
-		}
-		else if(targetSelector.id.slice(0,3) === 'pos')
-		{
-			if(!(targetObj instanceof SolitaireCard))
-				throw new Error("RuleDefinition: selector " + targetSelector.id + " not allowed on target " + targetId +
-									" of type " + targetObj.contructor);
-			
-			var sign = targetSelector.id.slice(3,4);
-			var targetPosition = 0;
-			if(sign === '+' || sign === '-')
+			else if(targetSelector.id.slice(0,3) === 'pos')
 			{
-				//relative
-				var relativeIndex = parseInt(targetSelector.id.slice(3));
-				targetPosition = targetObj.pile.getCardPosition(targetObj) + relativeIndex;
+				if(!(targetObj instanceof SolitaireCard))
+					throw new Error("RuleDefinition: selector " + targetSelector.id + " not allowed on target " + targetId +
+										" of type " + targetObj.contructor);
+				
+				var sign = targetSelector.id.slice(3,4);
+				var targetPosition = 0;
+				if(sign === '+' || sign === '-')
+				{
+					//relative
+					var relativeIndex = parseInt(targetSelector.id.slice(3));
+					targetPosition = targetObj.pile.getCardPosition(targetObj) + relativeIndex;
+				}
+				else
+				{
+					//absolute
+					targetPosition = parseInt(targetSelector.slice(3));
+				}
+
+				var selection = [];
+
+				for(var i = 0; i < targetSelector.count; i++)
+				{
+					var currentPosition = targetPosition + i;
+					if(currentPosition < 0 || currentPosition >= targetObj.pile.getCount())
+						break;
+
+					selection.push(targetObj.pile.peekCard(currentPosition));
+
+				}
+				targetObj = selection;
+			}
+			else if(targetSelector.id === 'above')
+			{
+				if(!(targetObj instanceof SolitaireCard))
+					throw new Error("RuleDefinition: selector " + targetSelector.id + " not allowed on target " + targetId +
+										" of type " + targetObj.contructor);
+				var targetPosition = targetObj.pile.getCardPosition(targetObj) + 1;
+				var selection = [];
+				for(var i = 0; i < targetSelector.count; i++)
+				{
+					var currentPosition = targetPosition + i;
+					if(currentPosition < 0 || currentPosition >= targetObj.pile.getCount())
+						break;
+
+					selection.push(targetObj.pile.peekCard(currentPosition));
+
+				}
+				targetObj = selection;
+			}
+			else if(targetSelector.id === 'below')
+			{
+				if(!(targetObj instanceof SolitaireCard))
+					throw new Error("RuleDefinition: selector " + targetSelector.id + " not allowed on target " + targetId +
+										" of type " + targetObj.contructor);
+				var targetPosition = targetObj.pile.getCardPosition(targetObj) - 1;
+				var selection = [];
+				for(var i = 0; i < targetSelector.count; i++)
+				{
+					var currentPosition = targetPosition + i;
+					if(currentPosition < 0 || currentPosition >= targetObj.pile.getCount())
+						break;
+
+					selection.push(targetObj.pile.peekCard(currentPosition));
+
+				}
+				targetObj = selection;
+			}
+			else if(targetSelector.id === 'all')
+			{
+				if(!(targetObj instanceof SolitairePile))
+					throw new Error("RuleDefinition: selector " + targetSelector.id + " not allowed on target " + targetId +
+										" of type " + targetObj.contructor);
+				var selection = [];
+				for(var i = 0; i < targetObj.getCount(); i++)
+				{
+					selection.push(targetObj.peekCard(i));
+				}
+				targetObj = selection;
+			}
+			else if(targetSelector.id === 'this')
+			{
+				//do nothing (targetObj = targetObj)
 			}
 			else
 			{
-				//absolute
-				targetPosition = parseInt(targetSelector.slice(3));
+				throw new Error("RuleDefiniton: unknown selector " + targetSelector.id + " on target " + targetId);
 			}
 
-			var selection = [];
-
-			for(var i = 0; i < targetSelector.count; i++)
-			{
-				var currentPosition = targetPosition + i;
-				if(currentPosition < 0 || currentPosition >= targetObj.pile.getCount())
-					break;
-
-				selection.push(targetObj.pile.peekCard(currentPosition));
-
-			}
-			targetObj = selection;
+			if(targetObj.length === 0)
+				targetObj = null;
+			else if(targetObj.length === 1)
+				targetObj = targetObj[0];
 		}
-		else if(targetSelector.id === 'above')
-		{
-			if(!(targetObj instanceof SolitaireCard))
-				throw new Error("RuleDefinition: selector " + targetSelector.id + " not allowed on target " + targetId +
-									" of type " + targetObj.contructor);
-			var targetPosition = targetObj.pile.getCardPosition(targetObj) + 1;
-			var selection = [];
-			for(var i = 0; i < targetSelector.count; i++)
-			{
-				var currentPosition = targetPosition + i;
-				if(currentPosition < 0 || currentPosition >= targetObj.pile.getCount())
-					break;
-
-				selection.push(targetObj.pile.peekCard(currentPosition));
-
-			}
-			targetObj = selection;
-		}
-		else if(targetSelector.id === 'below')
-		{
-			if(!(targetObj instanceof SolitaireCard))
-				throw new Error("RuleDefinition: selector " + targetSelector.id + " not allowed on target " + targetId +
-									" of type " + targetObj.contructor);
-			var targetPosition = targetObj.pile.getCardPosition(targetObj) - 1;
-			var selection = [];
-			for(var i = 0; i < targetSelector.count; i++)
-			{
-				var currentPosition = targetPosition + i;
-				if(currentPosition < 0 || currentPosition >= targetObj.pile.getCount())
-					break;
-
-				selection.push(targetObj.pile.peekCard(currentPosition));
-
-			}
-			targetObj = selection;
-		}
-		else if(targetSelector.id === 'all')
-		{
-			if(!(targetObj instanceof SolitairePile))
-				throw new Error("RuleDefinition: selector " + targetSelector.id + " not allowed on target " + targetId +
-									" of type " + targetObj.contructor);
-			var selection = [];
-			for(var i = 0; i < targetObj.getCount(); i++)
-			{
-				selection.push(targetObj.peekCard(i));
-			}
-			targetObj = selection;
-		}
-		else if(targetSelector.id === 'this')
-		{
-			//do nothing (targetObj = targetObj)
-		}
-		else
-		{
-			throw new Error("RuleDefiniton: unknown selector " + targetSelector.id + " on target " + targetId);
-		}
-
-		if(targetObj.length === 0)
-			targetObj = null;
-		else if(targetObj.length === 1)
-			targetObj = targetObj[0];
 
 		return targetObj;
 	};
 
 	SolitaireModel.prototype.moveCard = function(card, pile, pos)
 	{
-		var triggers = this.game.rules.pileTypes[card.pile.pileType].triggers;
+		var grabTriggers = this.game.rules.pileTypes[card.pile.pileType].triggers;
+		var dropTriggers = this.game.rules.pileTypes[pile.pileType].triggers;
 		var dropTarget = pile.peekCard(pos);
 		var grabPile = card.pile;
 		var cardPosition = card.pile.getCardPosition(card);
 
 		card.pile.removeCard(card.pile.getCardPosition(card));
-		if(typeof triggers !== 'undefined')
+		if(typeof grabTriggers !== 'undefined')
 		{
 			//run grab triggers
-			this._evaluateRuleActionPairs(triggers.onGrab, { grabTarget : card, pile : grabPile });
+			this._evaluateRuleActionPairs(grabTriggers.onGrab, { grabTarget : card, pile : grabPile });
 		}
 
 		pile.putCard(card, pos);
-		if(typeof triggers !== 'undefined')
+		if(typeof grabTriggers !== 'undefined')
 		{
 			//run drop from triggers
-			this._evaluateRuleActionPairs(triggers.onDropFrom, { dropTarget : dropTarget, held : card, pile : grabPile });
+			this._evaluateRuleActionPairs(grabTriggers.onDropFrom, { dropTarget : dropTarget, held : card, pile : grabPile });
+		}
+		if(typeof dropTriggers !== 'undefined')
+		{
 			//run drop to triggers		
-			this._evaluateRuleActionPairs(this.game.rules.pileTypes[pile.pileType].onDropOnto, { dropTarget : dropTarget, held : card, pile : pile });
+			this._evaluateRuleActionPairs(dropTriggers.onDropOnto, { dropTarget : dropTarget, held : card, pile : pile });
 		}
 
 		this.onCardMoved(card, grabPile, pile);
