@@ -2,6 +2,10 @@
  * SolitaireView.js
  * Authors: James Lundgren, Victor Marrufo, Elliot Hatch, Dharani Adhikari
  * 
+ * This class deals with the view for the Solitaire application. Each card is 
+ * assigned a sprite that is loaded via a PIXI sprite sheet. Each card is placed 
+ * in a specific position on the screen based off of the rules defined in the rules 
+ * folder. 
  */
 
 
@@ -15,14 +19,17 @@
 	this.gridSize = null;
 	this.cardPixelSize = null;
 
+	// Stagger for cards
 	this.cardOffsetPercent = .2;
 
 	this.piles = {};
 	
+	// events
 	this.onCardMoved = null;
 	this.onPileActivated = null;
 	this.onNewGameStarted = null;
 
+	// Stage where the gameboard lives
 	this.stage = null;
 	
 
@@ -41,123 +48,62 @@
 	
 	// 'this' loses scope to the PIXI object inside the callback
 	// need a variable so we can call the functions and member variables
-	var testing = this; 
+	var this_ = this; 
 
 	// Callback method for when sprite sheet is loaded, can start the game
 	function onAssetsLoaded()
 	{
 	    // prevents onNewGame from returning early
-	    testing.loaded = true; 
-	    testing.onNewGame(testing.copyPiles, testing.gridSize);
+	    this_.loaded = true; 
+	    this_.onNewGame(this_.copyPiles, this_.gridSize);
 	}
-
-	
-	
-	// Dictionary that will hold all of our cards
-	//this.textures = {};
-
-	// fill the dictionary with the cards
-	/*
-	for (var i = 0; i < 4; i++)
-	{
-	    
-	    var suit = null;
-
-	    // i corresponds to the different suits
-	    if(i  === 0)
-		suit = "clubs" 
-            
-	    else if(i  === 1)
-		suit = "hearts";
-	    
-	    else if(i  === 2)
- 		suit = "diamonds";
-
-	    else
-		suit = "spades";
-	    
-	    var rank = null;
-
-	    // loop through all the cards in that suit and set the image 
-	    for(var j = 1; j < 14; j++)
-	    {
-		rank = j;
-
- 		var texture = PIXI.Texture.fromImage("images/" + suit + "/" + rank + ".png");
-		var id = suit + rank; 
-		PIXI.Texture.addTextureToCache(texture, id);
-		
-		//this.textures[suit+rank] = PIXI.Texture.fromImage("images/" + suit + "/" + rank + ".png");
-	    }   
-        }   
-	
-
-	var texture = PIXI.Texture.fromImage("images/backOfCard.png");
-	var id = "facedown"; 
-	PIXI.Texture.addTextureToCache(texture, id);
-	var pileTexture = PIXI.Texture.fromImage("images/redJoker.png");
-	PIXI.Texture.addTextureToCache(pileTexture, 'pile');
-*/
-	
-	//this.textures["facedown"] = PIXI.Texture.fromImage("images/backOfCard.png");
 	
 	//initialize pixi, view variables, etc
 	stage = new PIXI.Stage(0xF2343F, true);
 	renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight, document.getElementById("game_board"));
 
-	//renderer.view.style.width = '800px';
-	//renderer.view.style.height = '600px';
+	
+	
 	document.body.appendChild(renderer.view);
         renderer.view.style.position = "absolute";
 	renderer.view.style.top = "0px";
         renderer.view.style.left = "0px";
 	renderer.view.style.minwidth= "800px";	  //Dharani uncommented. This should not hurt anything.      
 	renderer.view.style.minheight= "400px";
-	requestAnimFrame( animate );
+	requestAnimFrame( animate );	
 	
 	
-	// still need to amek the rectangles resize
-	/*	function rectangle( x, y, width, height, backgroundColor, borderColor, borderWidth ) { 
-		var box = new PIXI.Graphics();
-		box.beginFill(backgroundColor);
-		box.lineStyle(borderWidth , borderColor);
-		box.drawRect(0, 0, width - borderWidth, height - borderWidth);
-		box.endFill();
-		box.position.x = x  ;
-		box.position.y = y  ;
-
-		box.scale.x = box.scale.y = (window.innerWidth + window.innerHeight)/2000;
-		return box;
-		};
-	*/
-
-	// create a 100x100 white rectangle with a 10px black border at position 10/10
-	// stage.addChild(rectangle(window.innerHeight *.7 , window.innerHeight * .03 , 90, 110 , 0xFFFFFF, 0x000000, 5));
-	// stage.addChild(rectangle(window.innerHeight *.9 ,window.innerHeight * .03 , 90, 110 , 0xFFFFFF, 0x000000, 5));
-	// stage.addChild(rectangle(window.innerHeight *1.1,window.innerHeight * .03  , 90, 110 , 0xFFFFFF, 0x000000, 5));
-	// stage.addChild(rectangle(window.innerHeight *1.3,window.innerHeight * .03  , 90, 110 , 0xFFFFFF, 0x000000, 5));
-	
-	
-	var check = true;
+	// Used to position piles
 	var current_pile;
 	var y_offset = 1.0; 
 	var x_offset = 1.0; 
 
+	/* Helper method that gets a cards texture.
+	 * The card will either be face up or face down, 
+	 * default it to facedown. Set is as the name in the 
+	 * cards.json file
+	 */
 	SolitaireView.prototype._getCardTexture = function(cardModel)
 	{
-	    //var textureName = 'facedown';
 	    var textureName = 'backOfCard.png';
 	    if(cardModel.facingUp)
-		textureName = cardModel.suit + "/" + cardModel.rank + ".png";//cardModel.suit + cardModel.rank;
+		textureName = cardModel.suit + "/" + cardModel.rank + ".png";
 	    return PIXI.Texture.fromFrame(textureName);
 	};
 
+	/* Helper method used to get the pixel position of the pile as the 
+	 * user drops a card. This helps when trying to evaluate what card  
+	 * the user dropped on top of and for positioning the card accordingly
+	 */
 	SolitaireView.prototype._getPilePixelPosition = function(pileModel)
 	{
 	    return {x: pileModel.position.x  * this.cardPixelSize.width,
 		    y: pileModel.position.y * this.cardPixelSize.height};
 	}
 
+	/* Gets pixel position of the card as the user drops it
+	 * Helps with evaluating validity of a move
+	 */
 	SolitaireView.prototype._getCardPixelPosition = function(cardModel)
 	{
 	    var pilePosition = this._getPilePixelPosition(cardModel.pile);
@@ -168,7 +114,9 @@
 	    return {x: pilePosition.x + cardOffset.x, y: pilePosition.y + cardOffset.y};
 	};
 
-
+	/* Determines the offset for a card. Used when setting up game, and when user makes a valid move
+	 * Accounts for different fan directions a game might have (up down left right)
+	 */
 	SolitaireView.prototype._calculateCardPixelOffset = function(fanDirection, cardPosition)
 	{
 	    var cardOffset = {x: 0, y: 0 };
@@ -196,11 +144,17 @@
 	    return cardOffset;
 	}
 
+	/* Assigns a sprite to a pile object. Each pile has the red joker as its base card. 
+	 * The jokers cannot be moved, but when the stock pile is empty, the cards are restored
+	 * by clicking on the joker so that the user can cycle through them again
+	 */
 	SolitaireView.prototype.createPileSprite = function(pileModel)
 	{
-	    var texture = PIXI.Texture.fromFrame('redJoker.png');//'pile');
+	    // Retrieve the sprite from the cache
+	    var texture = PIXI.Texture.fromFrame('redJoker.png');
 	    var pile = new PIXI.Sprite(texture);
 
+	    // Place the card accordingly
 	    pile.width = this.cardPixelSize.width;
 	    pile.height = this.cardPixelSize.height;
 
@@ -217,12 +171,16 @@
 	    {
 	    	_this.onPileActivated(pileModel);
 	    };
-
+	    
+	    // Need to add to stage
 	    stage.addChild(pile);
 
 	    return pile;
 	};
 
+	/* Helper method that gets the pile given a specific position. Used to evaluate
+	 * the validity of a card move. 
+	 */
 	SolitaireView.prototype._getPileViewAtGridPosition = function(gridPosition)
 	{
 	    for(var pileId in this.piles)
@@ -237,6 +195,9 @@
 	    return null;
 	};
 
+	/*
+	 * Returns the bounding box of a pile
+	 */
 	SolitaireView.prototype._getBoundingBoxOfPileView = function(pileView)
 	{
 	    var pilePixelPosition = this._getPilePixelPosition(pileView.pile);
@@ -266,14 +227,18 @@
 	    return boundingBox;
 	};
 
+	/* Determines if a card is overlapping another card based off of their bounding boxes. 
+	 */
 	SolitaireView.prototype._pointInBoundingBox = function(point, boundingBox)
 	{
 	    return (point.x >= boundingBox.x1 && point.x <= boundingBox.x2 &&
 		    point.y >= boundingBox.y1 && point.y <= boundingBox.y2);
 	};
 
-	// Pass in the image that is associated with the card
-	//SolitaireView.prototype.createCard = function(x, y, texture, pile_id, facing_up)
+	/* Attaches a PIXI sprite to each card object. The cards are positioned according to the 
+	 * what the model has calculated its position to be. Handles mouse events that involve 
+	 * the card.
+	 */
 	SolitaireView.prototype.createCardSprite = function(cardModel)
 	{
 	    var facing_up = cardModel.facingUp; 
@@ -292,9 +257,11 @@
 	    
 	    // this button mode will mean the hand cursor appears when you rollover the card with your mouse
 	    card.buttonMode = true;
-	    
+	   
+	    // Need to use 'this' inside of the event functions, set the variable
 	    var _this = this;
 
+	    
 	    card.click = card.tap = function(interactionData)
 	    {
 	    	_this.onPileActivated(cardModel.pile, cardModel);
@@ -312,6 +279,7 @@
 		this.interactionData = interactionData;
 		this.alpha = 0.9;
 		
+		// Only let the user grab cards that are supposed to be moved
 		if (model.canGrabCard(cardModel))
 		{
 		    this.dragging = true;
@@ -390,7 +358,7 @@
 		this.interactionData = null;
 		};
 	    
-	    //    // set the callbacks for when the mouse or a touch moves
+	    // set the callbacks for when the mouse or a touch moves
 	    card.mousemove = card.touchmove = function(interactionData)
 	    {
 		if(this.dragging)
@@ -403,7 +371,7 @@
 		    this.position.y = newPosition.y - this.sy;
 		}
 	    };
-	    //    }
+	    
 	    
 
 	    //    //------------------------------------------------------------
@@ -425,6 +393,7 @@
 	    
 	}
 	
+	// Animation Loop
 	function animate()
 	{
 	    requestAnimFrame( animate ); 
@@ -435,39 +404,21 @@
 
 
         /**
-	 * resize the c4 sprite so that it takes up most of the screen
+	 * resize the card sprite so that it takes up most of the screen
 	 *
 	 */
 	function resize (event)
 	{
 	    
-	    console.log("--------------------");
-	    //console.log("  Window Size: " + window.innerWidth + ", " + window.innerHeight);
-	    //console.log("  C4 current    x,y, w,h  " + c4.position.x + ", " + c4.position.y + ": "+ c4.width   + ", " + c4.height);
 	    
-	    //  boundingbox.clear();
-	    //boundingbox.lineStyle(2,0xffffff);
-	    //boundingbox.beginFill(0xFFFF0B, 0);
-	    //boundingbox.drawRect(0,0,window.innerWidth, window.innerHeight);
-	    //boundingbox.endFill();
-	    
-	    
-	    //
 	    // Resize Renderer Window
-	    //
 	    renderer.resize(window.innerWidth, window.innerHeight);
 
-	    //
-	    // find current c4 bounds and resize/reposition c4 board
-	    //
-	    //    var c4_bounds = PIXI.DisplayObjectstage.prototype.getBounds.call(c4).clone();
-	    
-	    //
 	    // need to compute new scale based on original size of C4 sprite, so 
 	    // put back to original size
 	    //
 	    
-	    stage.scale.x = 1;  // WARNING: must compute center based on original size, not previous scaled size
+	    stage.scale.x = 1;  
 	    stage.scale.y = 1;
 	    
 	    var dw = (window.innerWidth-100)/stage.width; //stage_bounds
@@ -484,49 +435,14 @@
 	    stage.position.x = (window.innerWidth/2) - (stage.width/2) +100 ;
 	    stage.position.y = (window.innerHeight/2) - (stage.height/2) -15;
 	    
-	    
-	    
-	    //    renderer.render(stage);     // render the stage (required to recompute the acutal size of the sprite)
-	    //    stage_bounds = PIXI.DisplayObjectstage.prototype.getBounds.call(stage).clone();
-	    
-	    
-	    //stage.position.x = 0;
-	    //stage.position.y = 0;
-	    
-	    //    stage.updateTransform();
-	    
-	    //    renderer.render(stage);     // render the stage (required to recompute the acutal size of the sprite)
-	    //    stage_bounds = PIXI.DisplayObjectstage.prototype.getBounds.call(stage).clone();
-	    
-	    //    console.log("  STAGE bounds x,y, w,h  " + stage_bounds.x + ", " + stage_bounds.y + ": "+ stage_bounds.width   + ", " + stage_bounds.height);
-	    //	console.log("  STAGE final  x,y, w,h  " + stage.position.x + ", " + stage.position.y + ": "+ stage.width   + ", " + stage.height);
-	    
-	    //	console.log("   scale: " + dw + ", " + dh);
-	    
-	    
-	    //stage_bounds = PIXI.DisplayObjectstage.prototype.getBounds.call(stage).clone();
-	    //console.log("  STAGE final bounds x,y, w,h  " + stage_bounds.x + ", " + stage_bounds.y + ": "+ stage_bounds.width   + ", " + stage_bounds.height);
-	    
-	    //    boundingbox.position.x = stage.position.x;
-	    //    boundingbox.position.y = stage.position.y;
-	    
-	    //    boundingbox.clear();
-	    //    boundingbox.lineStyle(2,0xffffff);
-	    //    boundingbox.beginFill(0xFFFF0B, .1);
-	    //    boundingbox.drawRect(stage_bounds.x, stage_bounds.y, stage_bounds.width, stage_bounds.height);
-	    //    boundingbox.endFill();
-	    
-	    
 	    stage.updateTransform();
-	    //renderer.clearBeforeRender = true;
-	    //stage.dirty = true;
-
 	};
 
     };
-
-    //piles: associative array of pileId=>SolitairePile
-    //gridSize: size of the display grid as object, e.g. {"width" : 8, "height" : 6}
+    
+    /* Called by the controller when starting a new game
+     * makes calls to set up the gameboard 
+     */
     SolitaireView.prototype.onNewGame = function(piles, gridSize)
     {
     	this.gridSize = gridSize;
@@ -552,6 +468,7 @@
     	this.cardPixelSize = {width: gridPixelWidth,
 			      height: gridPixelHeight };	
 
+	// Cycle through each pile and initiate the cards 
 	for (var pileId in piles)
 	{
     	    if (piles.hasOwnProperty(pileId))
@@ -569,6 +486,8 @@
     	}
     };
 
+    /* Used when the pile has changed from adding or removing cards
+     */
     SolitaireView.prototype._updatePileCardViews = function(pileView)
     {
     	//update positions
@@ -581,7 +500,10 @@
 	    this.bringToFront(currentCardView.cardSprite);
 	}
     }
-
+    
+    /* Deals with card moving from one pile to another. 
+     * 
+     */
     SolitaireView.prototype.onModelMovedCard = function(card, oldPile, newPile)
     {
     	var oldPileView = this.piles[oldPile.pileId];
@@ -600,6 +522,9 @@
 	this._updatePileCardViews(newPileView);
     };
 
+    /* Called after the model has update the cards. Sets the texture 
+     * if the card has been turned over.
+     */
     SolitaireView.prototype.onModelUpdatedCard = function(card)
     {
     	var pileView = this.piles[card.pile.pileId];
@@ -610,6 +535,9 @@
 
     };
 
+    /* Called when player wins a game. 
+     * Play the win sound. Yay!
+     */
     SolitaireView.prototype.onGameWon = function()
     {
 	winsound.playclip();
@@ -617,6 +545,10 @@
 	//this.stage.interactive = false;
     };
 
+    /* Makes the most current card the top card. Otherwise 
+     * cards would only be able to be placed on top of cards that 
+     * were created before it. 
+     */
     SolitaireView.prototype.bringToFront = function(sprite)
     {
     	if(sprite.parent)
@@ -630,7 +562,8 @@
 
     window.SolitaireView = SolitaireView;
 
-
+    /* Constructor for the solitaire pile view so the model can access the methods
+     */
     var SolitairePileView = function(pile, solitaireView)
     {
 	this.pile = pile;
@@ -638,6 +571,8 @@
 	this.pileSprite = solitaireView.createPileSprite(this.pile);
     };
     
+    /* Returns the index of the card in the pile array
+     */
     SolitairePileView.prototype.indexOfCardView = function(cardModel)
     {
      	for(var i = 0; i < this.cards.length; i++)
@@ -646,23 +581,18 @@
     	    if(card.card === cardModel)
     		return i;
     	}
+	// the card was not in the pile
     	return -1;
     };
 
+    /* Constructor for the SolitaireCardView class
+     * Cards: 1 = ace 2= 2....king = 13
+     * Suits: clubs diamonds hearts spades
+     */ 
     var SolitaireCardView = function(card, solitaireView)
     {
-	// 1 = ace 2= 2....king = 13
-	// clubs diamonds hearts spades
 	this.card = card;
-	//this.card.rank
-	//this.card.facingUp;
-
-	//console.log(this.card.pile.pileId);
-	
-	// this.card.pile.getCardPosition(this.card) - returns index of what card position is of the card on the pile 
-	// 0 is bottom card, top is length -1 
 	this.cardSprite = solitaireView.createCardSprite(this.card); 
-        // solitaireView.createCard(this.card.pile.position.x, this.card.pile.position.y, texture, this.card.pile.pileId, this.card.facingUp); 
     };
 
 })(window);

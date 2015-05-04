@@ -1,3 +1,11 @@
+/*
+ * Stylesheet for Solitaire application 
+ * Authors: Team RAT Dharani Adhkari Elliot Hatch, James Lundgren, Victor Marrufo
+ *
+*/
+
+
+
 div#solitaireBoard{
     background-color:#00CC33;
     border:#999 1px solid;
@@ -119,35 +127,63 @@ div#solitaireBoard > #piles > #pile7{
     top:40%;
 }
 
-h1{
-    text-align:center;
-}
-
-#menu{
-    text-align:center;
-}
 
 #menu > button {
-     background:none!important;
-     border:none; 
-     padding:0!important;
-      font-size:large;
-     cursor: pointer;
+    background: none!important;
+    border:none; 
+    padding:0!important;
+    font-size:large;
+    cursor: pointer;
 }
+
 
 #menu > button:hover{
-    color:#00FF00;
+    color: white;
+    font-size: 130%;
 }
 
+
 #footer {
+   
    text-align:center;
    position:absolute;
    bottom:0;
    width:100%;
+   margin: 0;
    height:60px; 
+   color: white;
+   background-color: black;
+   border: 2px solid white;
+   border-radius: 2px; 
+   display: block;
 }
 
-#insideMenu {
+
+#vertical{
+    margin-top: 20px; 
+}
+
+
+html, body{
+    padding: 0;
+    margin: 0; 
+    text-align: center; 
+    background-color: #F2343F;
+    font-family: arial;
+}
+
+#insideMenu{
     text-align: right;
-    margin-right:100px;
+    margin-right: 100px; 
+}
+
+
+#inside{
+    z-index:10; 
+    background-color:black; 
+    border-radius:2px; 
+    margin-top: 5px; 
+    color:white; 
+    border: white; 
+    position:absolute;
 }
