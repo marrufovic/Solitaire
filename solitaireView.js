@@ -465,8 +465,17 @@
 	    gridPixelHeight = window.innerHeight / this.gridSize.height;
 	    gridPixelWidth = gridPixelHeight / textureAspectRatio;
 	}
+
+	//force a max size so the cards don't get HUUUGE
+	if(gridPixelHeight > 92.0 * 1.5)
+	{
+		gridPixelHeight = 92.0 * 1.5;
+		gridPixelWidth = 72.0 * 1.5;
+	}
     	this.cardPixelSize = {width: gridPixelWidth,
 			      height: gridPixelHeight };	
+
+
 
 	// Cycle through each pile and initiate the cards 
 	for (var pileId in piles)
