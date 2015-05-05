@@ -129,6 +129,10 @@ div#solitaireBoard > #piles > #pile7{
     top:40%;
 }
 
+h2{
+    color:white;
+}
+
 #menu {
     margin-top:25px;
 }
@@ -142,13 +146,14 @@ div#solitaireBoard > #piles > #pile7{
      background:none!important;
      border:none; 
      padding:0!important;
-      font-size:large;
+     font-size:large;
      cursor: pointer;
+     color:white;
 }
 
 #menu > button:hover{
     position: relative;
-    color: white;
+    color: black;
     font-size: 130%;
 }
 
