@@ -41,7 +41,13 @@
 								  ]
 				},
 				"triggers" : {"onDropFrom" : { "rule" : { "target" : { "id" : "pile", "selector" :"top" }, "condition" : { "attribute" : "facing", "relation" : "=", "value" : "down"}},
-									   "action" : { "command" : "face", "target" : { "id" : "pile", "selector" : "top"}, "arguments" : "up"}}
+									   "action" : { "command" : "face", "target" : { "id" : "pile", "selector" : "top"}, "arguments" : "up"}},
+						 	  "onDropOnto" : { "rule" : { "AND" : [{ "target" : "held", "condition" : {"attribute" : "rank", "relation" : "=", "value" : "run-1", "target" : {"id" : "held", 
+						 	  																																	"selector" : {"id" : "above", "count" : 13}}}},
+						 	  										{ "target" : "held", "condition" : {"attribute" : "color", "relation" : "=", "value" : "same", "target" : {"id" : "held", 
+						 	  																																	"selector" : {"id" : "above", "count" : 13}}}}]},
+								  "action" : { "command" : "move", "target" : { "id" : "held", "selector" : {"id" : "above", "count" : 13}}, "arguments" : ["win", "top", "down"]}
+								}
 							}
 			},
 			"stockPile" : {
