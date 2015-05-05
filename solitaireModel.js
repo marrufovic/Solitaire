@@ -1,5 +1,10 @@
-//solitaireModel.js
-
+/*
+ * solitaireModel.js
+ * Authors: TeamRAT-UofU
+ * Model for the solitaire application. Handles the behind the scenes
+ * functionality required such as shuffling a deck, creating the piles
+ * checking validity of card moves etc. 
+ */
 (function(window) {
 
 	//fisher-yates shuffle, implementation from http://stackoverflow.com/a/2450976
@@ -126,7 +131,10 @@
 		
 
 	};
-
+        
+        /*
+	 * Creates a new deck of cards
+	 */
 	SolitaireModel.prototype._makeDeck = function(deckType)
 	{
 		var deck = [];

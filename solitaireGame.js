@@ -1,7 +1,12 @@
-//solitaireGame.js
-
+/*
+ * solitaireGame.js
+ * Authors: TeamRAT-UofU
+ * Date: 4/18/2015
+ * Loads a game based off of what the user selects
+ */
 var gameRules = new SolitaireGameRules();
 gameRules.loadGame(game, 
+
 // gameRules.loadGame("rules/freecell.json", 
 // gameRules.loadGame("rules/spider-intermediate.json", 
 	function() {
@@ -11,7 +16,7 @@ gameRules.loadGame(game,
 
 	model.newGame(gameRules);
 
-
+	// Debugging information
 	console.log(model.piles);
 	// var pile = model.piles['pile4'];
 	// model.moveCard(pile.peekCard(1), model.piles['pile1'], 'top');

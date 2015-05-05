@@ -1,17 +1,20 @@
 /*
- *
+ * soundfile.js
+ * Sounds used when the cards are moved
  * Authors: Dharani Adhikari, James Lungren, Elliot Hatch, Victor Murrafo
  * Reference Source: http://www.javascriptkit.com/script/script2/soundlink.shtml#current
  */
 
-
-var html5_audiotypes={ //define list of audio file extensions and their associated audio types. Add to it if your specified audio file isn't on this list:
+// Define list of audio file extensions and their associated audio types. 
+// Add to it if your specified audio file isn't on this list:
+var html5_audiotypes={ 
     "mp3": "audio/mpeg",
     "mp4": "audio/mp4",
     "ogg": "audio/ogg",
     "wav": "audio/wav"
 }
 
+//Creates the new sound from the loaded sounds
 function createSound(sound){
     var solitaireAudio=document.createElement('audio')
     if (solitaireAudio.canPlayType){ //check support for HTML5 audio

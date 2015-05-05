@@ -1,7 +1,13 @@
-//SolitaireController.js
+/*
+ * SolitaireController.js
+ * Authors: TeamRat-UofU
+ * Date: 4/15/2015
+ * Controller for the Solitaire application. Makes calls to the Model and View 
+ * when a new game is requested and when users move cards.
+ *
+ */
 
-// Elliot, I am still going over what you have done and trying to learn the game rules. I haven't been able to focus
-// on it a lot because I have been sick for last few days. I will keep working on it over next few days. -Dharani
+
 
 (function(window) {
 
@@ -14,13 +20,13 @@
 
 		//use closure beacause if we just set onCardMoved to _cardMoved, "this" would refer to the view
 		//alternatively we could use function.bind
-
 		this.view.onNewGameStarted = function(gameType) {
 			var gameRules = new SolitaireGameRules();
 			gameRules.loadGame("rules/" + gameType + ".json", function() {
 				_this.model.newGame(gameType); 
 			});
 		};
+	        // Callbacks 
 		this.view.onCardMoved = function(card, pile, pos) { _this.model.moveCard(card, pile, pos); };
 		this.view.onPileActivated = function(pile, card) { _this.model.activatePile(pile, card); };
 

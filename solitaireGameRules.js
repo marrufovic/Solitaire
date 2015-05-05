@@ -1,5 +1,7 @@
-//solitaireGameRules.js
-
+/*solitaireGameRules.js
+ * Authors: TeamRAT-UofU
+ * Gets the json rule sheets 
+ */ 
 (function(window) {
 
 	//classes
