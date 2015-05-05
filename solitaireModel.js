@@ -393,7 +393,7 @@
 					{
 						objectComparison = true;
 						var relativeValue = parseInt(condition.value.slice(3));
-						rhs -= relativeValue * (i + 1);
+						rhs -= relativeValue * (j + 1);
 
 					}
 					else if(condition.value.slice(0,1) === '+' || condition.value.slice(0,1) === '-')
