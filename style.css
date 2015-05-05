@@ -4,7 +4,9 @@
  *
 */
 
-
+#main {
+    margin-top:25px;
+}
 
 div#solitaireBoard{
     background-color:#00CC33;
@@ -127,21 +129,36 @@ div#solitaireBoard > #piles > #pile7{
     top:40%;
 }
 
-
-#menu > button {
-    background: none!important;
-    border:none; 
-    padding:0!important;
-    font-size:large;
-    cursor: pointer;
+#menu {
+    margin-top:25px;
 }
 
+#menu > pre{
+    text-align:center;
+    font-family:"Trebuchet MS", Arial, Helvetica, sans-serif;
+}
+
+#menu > button {
+     background:none!important;
+     border:none; 
+     padding:0!important;
+      font-size:large;
+     cursor: pointer;
+}
 
 #menu > button:hover{
+    position: relative;
     color: white;
     font-size: 130%;
 }
 
+#menu > button:hover:before{
+    content: url(images/select.png);
+    display: inline-block;
+    position: absolute;
+    right:100px;
+    top:15px;
+}
 
 #footer {
    
@@ -172,18 +189,37 @@ html, body{
     font-family: arial;
 }
 
-#insideMenu{
+#insideMenu {
     text-align: right;
-    margin-right: 100px; 
+    margin-right:150px;
 }
 
-
-#inside{
-    z-index:10; 
-    background-color:black; 
+#insideMenu > #inside1{
+    text-align:center;
+    width:120px;
+    background-color:black;
     border-radius:2px; 
-    margin-top: 5px; 
     color:white; 
-    border: white; 
-    position:absolute;
+    border: white;
 }
+
+#insideMenu > #inside2{
+    text-align:center;
+    width:120px;
+    background-color:black;
+    border-radius:2px; 
+    color:white; 
+    border: white;
+    margin-top:20px;
+}
+
+#insideMenu > #inside1:hover{
+    background-color:white;  
+    color:black; 
+}
+
+#insideMenu > #inside2:hover{
+    background-color:white;  
+    color:black; 
+}
+

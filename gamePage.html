@@ -6,7 +6,7 @@
 
   <title>Solitaire</title>
   <meta name="description" content="HTML5 Solitaire">
-  <meta name="author" content="TeamRAT-UofU Dharani Adhkari, Elliot Hatch, James Lundgren, Victor Marrufo">
+  <meta name="author" content="TeamRAT-UofU">
   <link rel="stylesheet" type="text/css" href="style.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
   <script src="pixi.dev.js"></script>
@@ -20,7 +20,10 @@
   <script src="solitaireGame.js"></script>
   <script src="soundfile.js"></script><!-- Handles sound effects -->
   <script>
-        // Go back button functionality
+  	function newGame()
+	{
+		window.location = '/Projects/Solitaire/gamePage.html';
+	}
 	function goBack()
 	{
 		window.location = '/Projects/Solitaire/solitaire.html';
@@ -30,10 +33,11 @@
 </head>
 
 <body>
-  <div id="main">
-    <div id="insideMenu">
-      <button  id="inside" type="button" onClick="goBack()">Go Back</button>
-    </div>
-  </div>
+<div id="main">
+<div id="insideMenu">
+<button  id="inside1" type="button" style="z-index:10; position:absolute;" onClick="newGame()">New Game</button>
+<button  id="inside2" type="button" style="z-index:11; position:absolute;" onClick="goBack()">Back To Menu</button>
+</div>
+</div>
 </body>
 </html>
