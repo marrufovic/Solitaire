@@ -39,7 +39,7 @@
 	this.loaded = false; 
 
 	// Loads the spritesheet
-	var assetsToLoader = ["images/cards.json"];
+	var assetsToLoader = ["images/cards1.json"];
 	loader = new PIXI.AssetLoader(assetsToLoader);
 
 	// Set the callback for when the sprites are loaded
@@ -151,7 +151,7 @@
 	SolitaireView.prototype.createPileSprite = function(pileModel)
 	{
 	    // Retrieve the sprite from the cache
-	    var texture = PIXI.Texture.fromFrame('redJoker.png');
+	    var texture = PIXI.Texture.fromFrame('emptyCard.png');
 	    var pile = new PIXI.Sprite(texture);
 
 	    // Place the card accordingly
