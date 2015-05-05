@@ -541,6 +541,7 @@
     SolitaireView.prototype.onGameWon = function()
     {
 	winsound.playclip();
+	alert("you win -_-");
 	// inactivate all piles
 	//this.stage.interactive = false;
     };
