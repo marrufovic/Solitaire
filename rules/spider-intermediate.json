@@ -18,7 +18,7 @@
 			{ "id" : "stock2", "pileType" : "stockPile", "count" : 10, "position" : { "x" : 5, "y" : 4  }},
 			{ "id" : "stock3", "pileType" : "stockPile", "count" : 10, "position" : { "x" : 6, "y" : 4  }},
 			{ "id" : "stock4", "pileType" : "stockPile", "count" : 10, "position" : { "x" : 7, "y" : 4  }},
-			{ "id" : "stock4", "pileType" : "stockPile", "count" : 10, "position" : { "x" : 8, "y" : 4  }},
+			{ "id" : "stock5", "pileType" : "stockPile", "count" : 10, "position" : { "x" : 8, "y" : 4  }},
 			{ "id" : "win", "pileType" : "winPile", "position" : { "x" : 0, "y" : 4}}
 		]
 	},
